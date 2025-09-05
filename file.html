@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Info Form</title>
+  <style>
+    :root{
+      --maroon-rgba: rgba(128,0,0,0.9);
+      --card-bg: rgba(255,255,255,0.95);
+      --muted: #555;
+      --accent: #e6b8b8;
+      --radius: 10px;
+    }
+    html,body {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, #fbfbfb 0%, #f2f2f2 100%);
+      color: #222;
+    }
+
+    header {
+      background-color: var(--maroon-rgba);
+      color: #fff;
+      padding: 22px 20px;
+      position: relative;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+    header p { margin:6px 0 0 0; font-size:13px; opacity:0.95; }
+
+    /* upper-left logo style (inline img allowed too) */
+    header img.logo {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      width: 68px;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 26px auto;
+      padding: 18px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 6px 18px rgba(20,20,20,0.04);
+    }
+
+    form .row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    .col-2 { flex: 1 1 48%; min-width: 200px; }
+    .col-1 { flex: 1 1 100%; }
+
+    .actions {
+      display:flex;
+      gap:8px;
+      margin-top: 12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button.primary {
+      background: var(--maroon-rgba);
+      color: #fff;
+    }
+    button.ghost {
+      background: transparent;
+      border: 1px solid #ccc;
+      color: #333;
+    }
+    button.export {
+      background: #2e6b6b;
+      color: white;
+    }
+
+    table {
+      width:100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th { background: #fafafa; font-weight: 600; color: #333; }
+    .empty {
+      text-align:center;
+      padding: 28px;
+      color: #777;
+    }
+
+    @media (max-width:600px){
+      .col-2 { flex: 1 1 100%; }
+      header img.logo { width:54px; left:10px; top:10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <!-- If you have a logo file, set its src. If not, you can remove this line. -->
+    <img class="logo" src="faceid.png" alt="Logo (optional)" style="display:block;">
+    <h1>Student Information Form</h1>
+    <p>Enter the student's details below — Name, Email, LRN, Class, and Section.</p>
+  </header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main Page</title>
+</head>
+<body>
+    <h1>Main Page</h1>
+
+  <div class="wrap">
+    <div class="card">
+      <form id="studentForm" autocomplete="off">
+        <div class="row">
+          <div class="col-2">
+            <label for="name">Full Name</label>
+            <input id="name" name="name" type="text" placeholder="Juan dela Cruz" required>
+          </div>
+
+          <div class="col-2">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="juan@email.com" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-2">
+            <label for="lrn">LRN (12 digits)</label>
+            <input id="lrn" name="lrn" type="text" inputmode="numeric"
+                   placeholder="123456789012" minlength="12" maxlength="12"
+                   pattern="\d{12}" title="Enter exactly 12 digits" required>
+          </div>
+
+          <div class="col-2">
+            <label for="classInput">Class</label>
+            <input id="classInput" name="classInput" type="text" placeholder="Grade 10" required>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-2">
+            <label for="section">Section</label>
+            <input id="section" name="section" type="text" placeholder="A / Blue" required>
+          </div>
+
+          <div class="col-2" style="display:flex; align-items:flex-end;">
+            <div style="width:100%;">
+              <div class="actions">
+                <button class="primary" type="submit">Add Student</button>
+                <button class="ghost" type="button" id="clearBtn">Clear Form</button>
+                <button class="export" type="button" id="exportBtn">Export CSV</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div id="tableWrap" style="margin-top:8px;">
+        <table id="dataTable" aria-live="polite">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>LRN</th>
+              <th>Class</th>
+              <th>Section</th>
+            </tr>
+          </thead>
+          <tbody id="dataBody">
+            <tr class="empty-row"><td class="empty" colspan="6">No entries yet — add a student above.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const form = document.getElementById('studentForm');
+      const dataBody = document.getElementById('dataBody');
+      const clearBtn = document.getElementById('clearBtn');
+      const exportBtn = document.getElementById('exportBtn');
+
+      let rows = [];
+
+      function renderTable(){
+        dataBody.innerHTML = '';
+        if(rows.length === 0){
+          dataBody.innerHTML = '<tr class="empty-row"><td class="empty" colspan="6">No entries yet — add a student above.</td></tr>';
+          return;
+        }
+        rows.forEach((r, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${idx+1}</td>
+                          <td>${escapeHtml(r.name)}</td>
+                          <td>${escapeHtml(r.email)}</td>
+                          <td>${escapeHtml(r.lrn)}</td>
+                          <td>${escapeHtml(r.classInput)}</td>
+                          <td>${escapeHtml(r.section)}</td>`;
+          dataBody.appendChild(tr);
+        });
+      }
+
+      function escapeHtml(str){
+        if(!str) return '';
+        return String(str).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        // Basic validation for LRN pattern (in case browser doesn't support pattern)
+        const lrn = form.lrn.value.trim();
+        if(!/^\d{12}$/.test(lrn)){
+          alert('Please enter a valid 12-digit LRN.');
+          form.lrn.focus();
+          return;
+        }
+        const entry = {
+          name: form.name.value.trim(),
+          email: form.email.value.trim(),
+          lrn: lrn,
+          classInput: form.classInput.value.trim(),
+          section: form.section.value.trim()
+        };
+        rows.push(entry);
+        renderTable();
+        form.reset();
+        form.name.focus();
+      });
+
+      clearBtn.addEventListener('click', function(){
+        if(confirm('Clear all form fields?')) form.reset();
+      });
+
+      exportBtn.addEventListener('click', function(){
+        if(rows.length === 0){
+          alert('No data to export.');
+          return;
+        }
+        // convert to CSV
+        const header = ['Name','Email','LRN','Class','Section'];
+        const csvRows = [header.join(',')];
+        rows.forEach(r => {
+          // escape commas and quotes
+          const vals = [r.name, r.email, r.lrn, r.classInput, r.section].map(v => {
+            const s = String(v).replace(/"/g, '""');
+            return `"${s}"`;
+          });
+          csvRows.push(vals.join(','));
+        });
+        const csvContent = csvRows.join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'students.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // initial render
+      renderTable();
+    })();
+  </script>
+</body>
+</html>
