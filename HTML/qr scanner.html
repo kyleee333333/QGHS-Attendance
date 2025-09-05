@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Code Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #reader {
+      width: 400px;
+    }
+  </style>
+</head>
+<body>
+  <h2>QR Code Scanner</h2>
+  <div id="reader"></div>
+  <p id="result">Scan a QR code...</p>
+
+  <script>
+    function onScanSuccess(decodedText) {
+      document.getElementById("result").innerText = "Result: " + decodedText;
+    }
+    
+    function onScanError(errorMessage) {
+      console.warn("Scanning error:", errorMessage);
+    }
+
+    const html5QrCodeScanner = new Html5QrcodeScanner("reader", {
+      fps: 10,
+      qrbox: 250
+    });
+    html5QrCodeScanner.render(onScanSuccess, onScanError);
+  </script>
+
+<div id="reader" style="width:400px;"></div>
+
+<script>
+  function onScanSuccess(decodedText) {
+    alert("Scanned: " + decodedText);
+  }
+
+  const scanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: 250   // <-- this creates the scan box size
+  });
+  scanner.render(onScanSuccess);
+</script>
+
+<div id="reader" style="width:400px;"></div>
+<p id="result">Waiting for scan...</p>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+  function onScanSuccess(decodedText) {
+    document.getElementById("result").innerText = "Result: " + decodedText;
+  }
+
+  const scanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: 250
+  });
+  scanner.render(onScanSuccess);
+</script>
+
+</body>
+</html>
+
