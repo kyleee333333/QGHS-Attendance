@@ -7,6 +7,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>"https://kyleee333333.github.io/QGHS-Attendance/HTML/website.html"</script>
+    <script>
+        function
+        onScanSuccess(decodedText) 
+           alert("Scanned: " + decodedText, decodedResult) 
+            // test
+            scanner.clear().the(() => {
+                //now redirect to your second website
+                window.location.href = "https://kyleee333333.github.io/QGHS-Attendance/HTML/file.html";
+            }).catch(error => {
+                console.error("failed to stop scanner: ", error);
+                });
+        
+
+        //initialize scanner
+        let scanner = new
+        Html5Qrcode("reader");
+        scanner.start(
+            { facingMode: "environment" }, //use back camera
+            {fps: 10, qrbox: 250 },
+            onScanSuccess
+        );
+    </script>
     <style>
         * {
             margin: 0;
@@ -424,6 +447,8 @@
     </div>
 
     <div><img src="ffe218c6-afd0-4996-b1c3-2726f4d61824-removebg-preview.png" alt="DepEd" style="position:absolute; top:45px; left:250px; width:120px;"></div>
+
+     <div><img src="514941183_2004950386916168_8894779031226690441_n.png" alt="DepEd" style="position:absolute; top:45px; right:250px; width:120px;"></div>
 
     <script>
         // Global variables
