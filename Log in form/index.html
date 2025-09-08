@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Info Form</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f7f7f7; }
+    header { background: maroon; color:white; padding:16px; }
+    .wrap { max-width:600px; margin:20px auto; background:white; padding:20px; border-radius:8px; }
+    label { display:block; margin-top:10px; font-size:14px; }
+    input { width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px; }
+    button { margin-top:15px; padding:10px; border:none; background:maroon; color:white; border-radius:6px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Student Information Form</h1>
+  </header>
+
+  <div class="wrap">
+    <form id="studentForm">
+      <label>Full Name</label>
+      <input id="name" required>
+
+      <label>Email</label>
+      <input id="email" type="email" required>
+
+      <label>LRN (12 digits)</label>
+      <input id="lrn" maxlength="12" pattern="\d{12}" required>
+
+      <label>Class</label>
+      <input id="classInput" required>
+
+      <label>Section</label>
+      <input id="section" required>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("studentForm");
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const student = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        lrn: form.lrn.value.trim(),
+        classInput: form.classInput.value.trim(),
+        section: form.section.value.trim()
+      };
+
+      // Save to localStorage so admin can read it
+      const data = JSON.parse(localStorage.getItem("students") || "[]");
+      data.push(student);
+      localStorage.setItem("students", JSON.stringify(data));
+
+      alert("Student added successfully!");
+      form.reset();
+    });
+  </script>
+</body>
+</html>

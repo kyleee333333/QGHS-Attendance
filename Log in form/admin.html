@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Student Records</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#fafafa; }
+    header { background: darkgreen; color:white; padding:16px; }
+    .wrap { max-width:800px; margin:20px auto; background:white; padding:20px; border-radius:8px; }
+    table { width:100%; border-collapse:collapse; margin-top:15px; }
+    th, td { border:1px solid #ccc; padding:8px; }
+    th { background:#eee; }
+    button { margin-top:15px; padding:10px; border:none; background:darkgreen; color:white; border-radius:6px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Panel - Student Records</h1>
+  </header>
+
+  <div class="wrap">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>LRN</th>
+          <th>Class</th>
+          <th>Section</th>
+        </tr>
+      </thead>
+      <tbody id="dataBody"></tbody>
+    </table>
+
+    <button id="exportBtn">Export CSV</button>
+  </div>
+
+  <script>
+    const dataBody = document.getElementById("dataBody");
+    const rows = JSON.parse(localStorage.getItem("students") || "[]");
+
+    function renderTable(){
+      dataBody.innerHTML = "";
+      if(rows.length === 0){
+        dataBody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No entries yet</td></tr>";
+        return;
+      }
+      rows.forEach((r,i)=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${i+1}</td><td>${r.name}</td><td>${r.email}</td><td>${r.lrn}</td><td>${r.classInput}</td><td>${r.section}</td>`;
+        dataBody.appendChild(tr);
+      });
+    }
+
+    renderTable();
+
+    document.getElementById("exportBtn").addEventListener("click", ()=>{
+      if(rows.length === 0){ alert("No data to export."); return; }
+      const header = ["Name","Email","LRN","Class","Section"];
+      const csvRows = [header.join(",")];
+      rows.forEach(r => {
+        csvRows.push([r.name,r.email,r.lrn,r.classInput,r.section].join(","));
+      });
+      const blob = new Blob([csvRows.join("\n")], { type:"text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "students.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
