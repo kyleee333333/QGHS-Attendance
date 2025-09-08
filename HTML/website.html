@@ -384,14 +384,14 @@
             
             <div class="scanner-container">
                 <div class="form-group">
-                    <label for="sessionName">Session/Class Name</label>
+                    <label for="sessionName">Grade/Section</label>
                     <input type="text" id="sessionName" placeholder="e.g., Math Class - Monday">
                 </div>
                 
                 <button class="btn" onclick="startScanner()" id="startScanBtn">Start Scanner</button>
                 <button class="btn btn-danger" onclick="stopScanner()" id="stopScanBtn" style="display: none;">Stop Scanner</button>
                 
-                <div id="qr-reader" style="display: none; margin: 20px 0;"></div>
+                <div id="qr-reader" style="display: none; margin: 10px 0;"></div>
                 <div id="scanResult"></div>
             </div>
         </div>
@@ -406,9 +406,9 @@
                     <input type="date" id="filterDate">
                 </div>
                 <div class="form-group">
-                    <label for="filterSession">Filter by Session</label>
+                    <label for="filterSession">Filter by Section</label>
                     <select id="filterSession">
-                        <option value="">All Sessions</option>
+                        <option value="">All Sections</option>
                     </select>
                 </div>
                 <button class="btn btn-secondary" onclick="filterAttendance()">Apply Filter</button>
@@ -448,7 +448,7 @@
 
     <div><img src="ffe218c6-afd0-4996-b1c3-2726f4d61824-removebg-preview.png" alt="DepEd" style="position:absolute; top:45px; left:250px; width:120px;"></div>
 
-     <div><img src="514941183_2004950386916168_8894779031226690441_n.png" alt="DepEd" style="position:absolute; top:50px; right:250px; width:150px;"></div>
+     <div><img src="514941183_2004950386916168_8894779031226690441_n.png" alt="DepEd" style="position:absolute; top:45px; right:250px; width:120px;"></div>
 
     <script>
         // Global variables
@@ -977,5 +977,4 @@
         window.onload = init;
     </script>
 </body>
-
 </html>
