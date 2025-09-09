@@ -10,21 +10,25 @@
     <script>"https://kyleee333333.github.io/QGHS-Attendance/HTML/website.html"</script>
     <script>
         function
-onScanSuccess(decodedText) 
-   alert("Scanned: " + decodedText, decodedResult) 
-   scanner.clear().the(() => {
-       window.location.href = "https://kyleee333333.github.io/QGHS-Attendance/HTML/file.html";
-   }).catch(error => {
-       console.error("failed to stop scanner: ", error);
-   });
+        onScanSuccess(decodedText) 
+           alert("Scanned: " + decodedText, decodedResult) 
+            // test
+            scanner.clear().the(() => {
+                //now redirect to your second website
+                window.location.href = "https://kyleee333333.github.io/QGHS-Attendance/HTML/file.html";
+            }).catch(error => {
+                console.error("failed to stop scanner: ", error);
+                });
+        
 
-let scanner = new Html5Qrcode("reader");
-scanner.start(
-   { facingMode: "environment" },
-   { fps: 10, qrbox: 250 },
-   onScanSuccess
-);
-
+        //initialize scanner
+        let scanner = new
+        Html5Qrcode("reader");
+        scanner.start(
+            { facingMode: "environment" }, //use back camera
+            {fps: 10, qrbox: 250 },
+            onScanSuccess
+        );
     </script>
     <style>
         * {
@@ -836,30 +840,32 @@ scanner.start(
             container.appendChild(table);
         }
 
-        // Data persistence
-        function saveData() {
-            const data = {
-                students: students,
-                attendanceRecords: attendanceRecords
-            };
-            // In a real Excel file, this would save to the spreadsheet
-            // For this demo, we'll store in memory
-            window.attendanceData = data;
-        }
+        // Save to localStorage
+function saveData() {
+  const data = {
+    students: students,
+    attendanceRecords: attendanceRecords
+  };
+  localStorage.setItem("attendanceData", JSON.stringify(data));
+}
 
-        function loadData() {
-            // In a real Excel file, this would load from the spreadsheet
-            // For this demo, we'll use sample data
-            if (!window.attendanceData) {
-                window.attendanceData = {
-                    students: [],
-                    attendanceRecords: []
-                };
-            }
+// Load from localStorage
+function loadData() {
+  const saved = localStorage.getItem("attendanceData");
+  if (saved) {
+    const data = JSON.parse(saved);
+    students = data.students || [];
+    attendanceRecords = data.attendanceRecords || [];
+  } else {
+    students = [];
+    attendanceRecords = [];
+  }
+}
+
             
             students = window.attendanceData.students || [];
             attendanceRecords = window.attendanceData.attendanceRecords || [];
-        }
+        
 
         // Export functionality
         function exportToExcel() {
