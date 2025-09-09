@@ -1,333 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>QR Code Student Attendance System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+
+    <!-- QR generation library (qrcodejs) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- QR scanner library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+    <!-- XLSX for export/import -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>"https://kyleee333333.github.io/QGHS-Attendance/HTML/website.html"</script>
-    <script>
-        function
-        onScanSuccess(decodedText) 
-           alert("Scanned: " + decodedText, decodedResult) 
-            // test
-            scanner.clear().the(() => {
-                //now redirect to your second website
-                window.location.href = "https://kyleee333333.github.io/QGHS-Attendance/HTML/file.html";
-            }).catch(error => {
-                console.error("failed to stop scanner: ", error);
-                });
-        
 
-        //initialize scanner
-        let scanner = new
-        Html5Qrcode("reader");
-        scanner.start(
-            { facingMode: "environment" }, //use back camera
-            {fps: 10, qrbox: 250 },
-            onScanSuccess
-        );
-    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; padding:20px; }
+        .container { max-width:1200px; margin:0 auto; background:white; border-radius:15px; box-shadow:0 20px 40px rgba(0,0,0,0.08); overflow:hidden; }
+        .header { background: linear-gradient(135deg,#8e1919,#8e1919); color:white; padding:30px; text-align:center; }
+        .header h1 { font-size:2.5em; margin-bottom:6px; text-shadow:2px 2px 4px rgba(0,0,0,0.25); }
+        .header h2 { margin-bottom:6px; font-weight:600; }
+        .nav-tabs { display:flex; background:#f8f9fa; border-bottom:2px solid #ddd; }
+        .nav-tab { flex:1; padding:15px 20px; background:transparent; border:none; cursor:pointer; font-size:16px; font-weight:500; color:#666; transition:all .3s; border-bottom:3px solid transparent; }
+        .nav-tab.active { background:white; color:#8e1919; border-bottom-color:#851d1d; }
+        .nav-tab:hover { background:#e9ecef; color:#333; }
+        .tab-content { display:none; padding:30px; animation:fadeIn .25s ease-in; }
+        .tab-content.active { display:block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+        .form-row { display:flex; gap:15px; margin-bottom:20px; }
+        .form-row .form-group { flex:1; }
+        label { display:block; margin-bottom:8px; font-weight:600; color:#333; }
+        input, select { width:100%; padding:12px 15px; border:2px solid #ddd; border-radius:8px; font-size:16px; transition:border-color .2s; }
+        input:focus, select:focus { outline:none; border-color:#7f2222; box-shadow:0 0 0 3px rgba(127,34,34,0.08); }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgb(255, 255, 255);
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(241, 239, 239, 0.1);
-            overflow: hidden;
-        }
+        .btn { background:linear-gradient(135deg,#af4c4c,#a04545); color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-size:16px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+        .btn:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(159,31,31,0.2); }
+        .btn-secondary { background:linear-gradient(135deg,#6c757d,#5a6268); }
+        .btn-danger { background:linear-gradient(135deg,#dc3545,#c82333); }
 
-        .header {
-            background: linear-gradient(135deg, #8e1919, #8e1919);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+        .student-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; margin-top:20px; }
+        .student-card { background:white; border:2px solid #e9ecef; border-radius:12px; padding:20px; box-shadow:0 4px 6px rgba(0,0,0,0.06); transition:all .25s; display:flex; gap:15px; align-items:center; }
+        .student-card:hover { transform:translateY(-6px); box-shadow:0 8px 25px rgba(0,0,0,0.1); border-color:#af4c4c; }
+        .student-info h3 { color:#333; margin-bottom:6px; }
+        .student-info p { color:#666; margin-bottom:4px; font-size:14px;}
+        .qr-code-container { width:150px; text-align:center; }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
+        .scanner-container { max-width:600px; margin: 0 auto; text-align:center; }
+        #qr-reader { border:3px dashed #af4c4c; border-radius:12px; overflow:hidden; margin:12px 0; }
 
-        .nav-tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 2px solid #ddd;
-        }
+        .attendance-table { width:100%; border-collapse:collapse; margin-top:20px; background:white; border-radius:8px; overflow:hidden; box-shadow:0 4px 6px rgba(0,0,0,0.06); }
+        .attendance-table th, .attendance-table td { padding:12px 15px; text-align:left; border-bottom:1px solid #eee; }
+        .attendance-table th { background:#af4c4c; color:white; font-weight:600; }
+        .attendance-table tr:hover { background:#f8f9fa; }
+        .status-present { color:#1a7f1a; font-weight:bold; }
+        .status-absent { color:#dc3545; font-weight:bold; }
 
-        
-        .nav-tab {
-            flex: 1;
-            padding: 15px 20px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            color: #666;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:30px; }
+        .stat-card { background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:25px; border-radius:12px; text-align:center; box-shadow:0 4px 15px rgba(102,126,234,0.2); }
+        .stat-number { font-size:2.5em; font-weight:bold; margin-bottom:10px; }
+        .stat-label { font-size:1.1em; opacity:0.95; }
 
-        .nav-tab.active {
-            background: white;
-            color: #8e1919;
-            border-bottom-color: #851d1d;
-        }
+        .success-message, .error-message { padding:15px; border-radius:8px; margin:15px 0; font-weight:500; }
+        .success-message { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+        .error-message { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
 
-        .nav-tab:hover {
-            background: #e9ecef;
-            color: #333;
-        }
-
-        .tab-content {
-            display: none;
-            padding: 30px;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-                .form-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #7f2222;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #af4c4c, #a04545);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgb(159, 31, 31);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #5a6268);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-        }
-
-        .student-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .student-card {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .student-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            border-color: #af4c4c;
-        }
-
-        .student-info h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .student-info p {
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .qr-code {
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .scanner-container {
-            max-width: 500px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        #qr-reader {
-            border: 3px dashed #af4c4c;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .attendance-table th,
-        .attendance-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .attendance-table th {
-            background: #af4c4c;
-            color: white;
-            font-weight: 600;
-        }
-
-        .attendance-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        .status-present {
-            color: #a72828;
-            font-weight: bold;
-        }
-
-        .status-absent {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-                        padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .success-message, .error-message {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-weight: 500;
-        }
-
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .date-filter {
-            display: flex;
-            gap: 15px;
-            align-items: end;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-            
-            .nav-tabs {
-                flex-direction: column;
-            }
-            
-            .date-filter {
-                flex-direction: column;
-            }
+        @media (max-width:768px) {
+            .form-row { flex-direction:column; }
+            .nav-tabs { flex-direction:column; }
         }
     </style>
 </head>
@@ -340,24 +81,24 @@
         </div>
 
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('students')">👥 Students</button>
-            <button class="nav-tab" onclick="showTab('scanner')">📷 Scanner</button>
-            <button class="nav-tab" onclick="showTab('attendance')">📊 Attendance</button>
-            <button class="nav-tab" onclick="showTab('reports')">📈 Reports</button>
-            <button class="nav-tab" onclick="showTab('export')">💾 Export</button>
+            <button class="nav-tab active" onclick="showTab(event,'students')">👥 Students</button>
+            <button class="nav-tab" onclick="showTab(event,'scanner')">📷 Scanner</button>
+            <button class="nav-tab" onclick="showTab(event,'attendance')">📊 Attendance</button>
+            <button class="nav-tab" onclick="showTab(event,'reports')">📈 Reports</button>
+            <button class="nav-tab" onclick="showTab(event,'export')">💾 Export</button>
         </div>
 
         <!-- Students Tab -->
         <div id="students" class="tab-content active">
             <h2>Student Management</h2>
-            
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="studentName">Student Name</label>
                     <input type="text" id="studentName" placeholder="Enter student name">
                 </div>
                 <div class="form-group">
-                    <label for="studentId">Student ID</label>
+                    <label for="studentId">Student ID (LRN or ID)</label>
                     <input type="text" id="studentId" placeholder="Enter student ID">
                 </div>
             </div>
@@ -381,17 +122,19 @@
         <!-- Scanner Tab -->
         <div id="scanner" class="tab-content">
             <h2>QR Code Scanner</h2>
-            
+
             <div class="scanner-container">
                 <div class="form-group">
-                    <label for="sessionName">Grade/Section</label>
-                    <input type="text" id="sessionName" placeholder="e.g., Math Class - Monday">
+                    <label for="sectionName">Grade/Section</label>
+                    <input type="text" id="sectionName" placeholder="e.g., 10-A - Math (Monday)">
                 </div>
-                
-                <button class="btn" onclick="startScanner()" id="startScanBtn">Start Scanner</button>
-                <button class="btn btn-danger" onclick="stopScanner()" id="stopScanBtn" style="display: none;">Stop Scanner</button>
-                
-                <div id="qr-reader" style="display: none; margin: 10px 0;"></div>
+
+                <div style="margin:12px 0;">
+                    <button class="btn" onclick="startScanner()" id="startScanBtn">Start Scanner</button>
+                    <button class="btn btn-danger" onclick="stopScanner()" id="stopScanBtn" style="display:none;">Stop Scanner</button>
+                </div>
+
+                <div id="qr-reader" style="display:none;"></div>
                 <div id="scanResult"></div>
             </div>
         </div>
@@ -399,20 +142,23 @@
         <!-- Attendance Tab -->
         <div id="attendance" class="tab-content">
             <h2>Attendance Records</h2>
-            
+
             <div class="date-filter">
                 <div class="form-group">
                     <label for="filterDate">Filter by Date</label>
                     <input type="date" id="filterDate">
                 </div>
                 <div class="form-group">
-                    <label for="filterSession">Filter by Section</label>
-                    <select id="filterSession">
+                    <label for="filterSection">Filter by Section</label>
+                    <select id="filterSection">
                         <option value="">All Sections</option>
                     </select>
                 </div>
-                <button class="btn btn-secondary" onclick="filterAttendance()">Apply Filter</button>
-                <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+
+                <div style="display:flex; gap:10px; align-items:flex-end;">
+                    <button class="btn btn-secondary" onclick="filterAttendance()">Apply Filter</button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                </div>
             </div>
 
             <div id="attendanceTable"></div>
@@ -421,9 +167,9 @@
         <!-- Reports Tab -->
         <div id="reports" class="tab-content">
             <h2>Attendance Reports</h2>
-            
+
             <div class="stats-grid" id="statsGrid"></div>
-                        
+
             <h3>Individual Student Reports</h3>
             <div id="individualReports"></div>
         </div>
@@ -431,552 +177,502 @@
         <!-- Export Tab -->
         <div id="export" class="tab-content">
             <h2>Export Data</h2>
-            
+
             <p>Export your attendance data to Excel format for further analysis or record keeping.</p>
-            
-            <div class="form-row">
+
+            <div class="form-row" style="margin-bottom:15px;">
                 <button class="btn" onclick="exportToExcel()">📊 Export Attendance to Excel</button>
                 <button class="btn btn-secondary" onclick="exportStudents()">👥 Export Student List</button>
             </div>
 
             <div class="form-group">
-                <label for="importFile">Import Student Data (Excel/CSV)</label>
+                <label for="importFile">Import Student Data (Excel/CSV) — first sheet must have columns: Student Name, Student ID, Email, Class</label>
                 <input type="file" id="importFile" accept=".xlsx,.xls,.csv" onchange="importStudentData(event)">
             </div>
         </div>
     </div>
 
+    <!-- optional decorative images (if file names exist on server) -->
     <div><img src="ffe218c6-afd0-4996-b1c3-2726f4d61824-removebg-preview.png" alt="DepEd" style="position:absolute; top:45px; left:250px; width:120px;"></div>
+    <div><img src="514941183_2004950386916168_8894779031226690441_n.png" alt="DepEd" style="position:absolute; top:45px; right:250px; width:120px;"></div>
 
-     <div><img src="514941183_2004950386916168_8894779031226690441_n.png" alt="DepEd" style="position:absolute; top:45px; right:250px; width:120px;"></div>
+<script>
+    // --- Global state ---
+    let students = [];
+    let attendanceRecords = [];
+    let html5QrcodeScanner = null;
+    let currentSection = '';
 
-    <script>
-        // Global variables
-        let students = [];
-        let attendanceRecords = [];     
-        let html5QrcodeScanner = null;
-        let currentSession = '';
+    // --- Initialization & persistence ---
+    function init() {
+        loadData();
+        updateStudentsList();
+        updateAttendanceTable();
+        updateReports();
+        populateSectionFilter();
+    }
 
-        // Initialize the application
-        function init() {
-            loadData();
-            updateStudentsList();
-            updateAttendanceTable();
-            updateReports();
-            updateSessionFilter();
+    function saveData() {
+        localStorage.setItem('qghs_students', JSON.stringify(students));
+        localStorage.setItem('qghs_attendance', JSON.stringify(attendanceRecords));
+    }
+
+    function loadData() {
+        try {
+            students = JSON.parse(localStorage.getItem('qghs_students')) || [];
+            attendanceRecords = JSON.parse(localStorage.getItem('qghs_attendance')) || [];
+        } catch (e) {
+            students = [];
+            attendanceRecords = [];
+        }
+    }
+
+    // --- Tabs ---
+    function showTab(evt, tabName) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // --- Student management ---
+    function addStudent() {
+        const name = document.getElementById('studentName').value.trim();
+        const id = document.getElementById('studentId').value.trim();
+        const email = document.getElementById('studentEmail').value.trim();
+        const studentClass = document.getElementById('studentClass').value.trim();
+
+        if (!name || !id) {
+            showMessage('Please enter both student name and ID', 'error');
+            return;
+        }
+        if (students.find(s => s.id === id)) {
+            showMessage('Student ID already exists', 'error');
+            return;
         }
 
-        // Tab switching
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
+        const student = { name, id, email, class: studentClass, qrCode: generateQRData(id) };
+        students.push(student);
+        saveData();
+        updateStudentsList();
+        populateSectionFilter();
+        // clear form
+        document.getElementById('studentName').value = '';
+        document.getElementById('studentId').value = '';
+        document.getElementById('studentEmail').value = '';
+        document.getElementById('studentClass').value = '';
+        showMessage('Student added successfully!', 'success');
+    }
+
+    function removeStudent(studentId) {
+        if (!confirm('Are you sure you want to remove this student?')) return;
+        students = students.filter(s => s.id !== studentId);
+        attendanceRecords = attendanceRecords.filter(r => r.studentId !== studentId);
+        saveData();
+        updateStudentsList();
+        updateAttendanceTable();
+        updateReports();
+        populateSectionFilter();
+        showMessage('Student removed successfully!', 'success');
+    }
+
+    function generateQRData(studentId) {
+        // include studentId only (scanner expects this)
+        return JSON.stringify({ studentId });
+    }
+
+    function updateStudentsList() {
+        const container = document.getElementById('studentsList');
+        container.innerHTML = '';
+        students.forEach(student => {
+            const card = document.createElement('div');
+            card.className = 'student-card';
+
+            // info column
+            const info = document.createElement('div');
+            info.className = 'student-info';
+            info.innerHTML = `
+                <h3>${escapeHtml(student.name)}</h3>
+                <p><strong>ID:</strong> ${escapeHtml(student.id)}</p>
+                <p><strong>Email:</strong> ${escapeHtml(student.email || 'N/A')}</p>
+                <p><strong>Class:</strong> ${escapeHtml(student.class || 'N/A')}</p>
+            `;
+
+            // qr container
+            const qrWrap = document.createElement('div');
+            qrWrap.className = 'qr-code-container';
+            // create a div for qrcodejs to render into
+            const qrDiv = document.createElement('div');
+            // render QR code (qrcodejs)
+            new QRCode(qrDiv, {
+                text: student.qrCode,
+                width: 150,
+                height: 150,
+                correctLevel: QRCode.CorrectLevel.H
             });
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            qrWrap.appendChild(qrDiv);
 
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            // remove button
+            const actions = document.createElement('div');
+            actions.style.marginLeft = 'auto';
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger';
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = () => removeStudent(student.id);
+            actions.appendChild(removeBtn);
+
+            // assemble
+            card.appendChild(qrWrap);
+            card.appendChild(info);
+            card.appendChild(actions);
+            container.appendChild(card);
+        });
+    }
+
+    // --- Scanner functions ---
+    function startScanner() {
+        const sectionName = document.getElementById('sectionName').value.trim();
+        if (!sectionName) {
+            showMessage('Please enter a section name', 'error');
+            return;
+        }
+        currentSection = sectionName;
+
+        document.getElementById('qr-reader').style.display = 'block';
+        document.getElementById('startScanBtn').style.display = 'none';
+        document.getElementById('stopScanBtn').style.display = 'inline-block';
+
+        // create/clear existing
+        if (html5QrcodeScanner) {
+            // if an instance exists, clear it first
+            html5QrcodeScanner.clear().catch(() => { /* ignore */ }).finally(() => html5QrcodeScanner = null);
         }
 
-        // Student management
-        function addStudent() {
-            const name = document.getElementById('studentName').value.trim();
-            const id = document.getElementById('studentId').value.trim();
-            const email = document.getElementById('studentEmail').value.trim();
-            const studentClass = document.getElementById('studentClass').value.trim();
+        // Html5QrcodeScanner automatically creates UI with a camera selector
+        html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+        }, /* verbose= */ false);
 
-            if (!name || !id) {
-                showMessage('Please enter both student name and ID', 'error');
-                return;
-            }
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    }
 
-            if (students.find(s => s.id === id)) {
-                showMessage('Student ID already exists', 'error');
-                return;
-            }
-
-            const student = {
-                name,
-                id,
-                email,
-                class: studentClass,
-                qrCode: generateQRData(id)
-            };
-
-            students.push(student);
-            saveData();
-            updateStudentsList();
-            
-            // Clear form
-            document.getElementById('studentName').value = '';
-            document.getElementById('studentId').value = '';
-            document.getElementById('studentEmail').value = '';
-            document.getElementById('studentClass').value = '';
-
-            showMessage('Student added successfully!', 'success');
-        }
-
-        function removeStudent(studentId) {
-            if (confirm('Are you sure you want to remove this student?')) {
-                students = students.filter(s => s.id !== studentId);
-                attendanceRecords = attendanceRecords.filter(r => r.studentId !== studentId);
-                saveData();
-                updateStudentsList();
-                updateAttendanceTable();
-                updateReports();
-                                showMessage('Student removed successfully!', 'success');
-            }
-        }
-
-        function generateQRData(studentId) {
-            return JSON.stringify({
-                studentId: studentId,
-                timestamp: Date.now()
-            });
-        }
-
-        function updateStudentsList() {
-            const container = document.getElementById('studentsList');
-            container.innerHTML = '';
-
-            students.forEach(student => {
-                const card = document.createElement('div');
-                card.className = 'student-card';
-                
-                const qrCodeDiv = document.createElement('div');
-                qrCodeDiv.className = 'qr-code';
-                
-                // Generate QR code
-                QRCode.toCanvas(qrCodeDiv, student.qrCode, {
-                    width: 150,
-                    height: 150,
-                    margin: 2
-                }, (error) => {
-                    if (error) console.error(error);
-                });
-
-                card.innerHTML = `
-                    <div class="student-info">
-                        <h3>${student.name}</h3>
-                        <p><strong>ID:</strong> ${student.id}</p>
-                        <p><strong>Email:</strong> ${student.email || 'N/A'}</p>
-                        <p><strong>Class:</strong> ${student.class || 'N/A'}</p>
-                    </div>
-                    <div class="qr-code-container"></div>
-                    <button class="btn btn-danger" onclick="removeStudent('${student.id}')">Remove</button>
-                `;
-                
-                card.querySelector('.qr-code-container').appendChild(qrCodeDiv);
-                container.appendChild(card);
-            });
-        }
-
-        // QR Scanner functionality
-        function startScanner() {
-            const sessionName = document.getElementById('sessionName').value.trim();
-            if (!sessionName) {
-                showMessage('Please enter a session name', 'error');
-                return;
-            }
-
-            currentSession = sessionName;
-            
-            const qrReaderDiv = document.getElementById('qr-reader');
-            qrReaderDiv.style.display = 'block';
-
-            html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", {
-                fps: 10,
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            });
-
-            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            
-            document.getElementById('startScanBtn').style.display = 'none';
-            document.getElementById('stopScanBtn').style.display = 'inline-block';
-        }
-
-        function stopScanner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear();
+    function stopScanner() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear().then(() => {
                 html5QrcodeScanner = null;
-            }
-            
+                document.getElementById('qr-reader').style.display = 'none';
+                document.getElementById('startScanBtn').style.display = 'inline-block';
+                document.getElementById('stopScanBtn').style.display = 'none';
+                document.getElementById('scanResult').innerHTML = '';
+            }).catch(err => {
+                console.error('Failed to stop scanner', err);
+            });
+        } else {
             document.getElementById('qr-reader').style.display = 'none';
             document.getElementById('startScanBtn').style.display = 'inline-block';
             document.getElementById('stopScanBtn').style.display = 'none';
             document.getElementById('scanResult').innerHTML = '';
         }
+    }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            try {
-                const qrData = JSON.parse(decodedText);
-                const studentId = qrData.studentId;
-                const student = students.find(s => s.id === studentId);
-
-                if (!student) {
-                    showScanResult('Student not found in database', 'error');
-                    return;
-                }
-
-                // Check if already marked present today
-                const today = new Date().toDateString();
-                const existingRecord = attendanceRecords.find(r => 
-                    r.studentId === studentId && 
-                    r.session === currentSession &&
-                                        new Date(r.date).toDateString() === today
-                );
-
-                if (existingRecord) {
-                    showScanResult(`${student.name} already marked present for this session today`, 'error');
-                    return;
-                }
-
-                // Mark attendance
-                const attendanceRecord = {
-                    studentId: studentId,
-                    studentName: student.name,
-                    session: currentSession,
-                    date: new Date().toISOString(),
-                    status: 'Present'
-                };
-
-                attendanceRecords.push(attendanceRecord);
-                saveData();
-                updateAttendanceTable();
-                updateReports();
-                updateSessionFilter();
-
-                showScanResult(`✅ ${student.name} marked present!`, 'success');
-
-            } catch (error) {
-                showScanResult('Invalid QR code format', 'error');
-            }
-        }
-
-        function onScanFailure(error) {
-            // Handle scan failure silently
-        }
-
-        function showScanResult(message, type) {
-            const resultDiv = document.getElementById('scanResult');
-            resultDiv.className = type === 'success' ? 'success-message' : 'error-message';
-            resultDiv.innerHTML = message;
-
-            setTimeout(() => {
-                resultDiv.innerHTML = '';
-            }, 3000);
-        }
-
-        // Attendance management
-        function updateAttendanceTable() {
-            const container = document.getElementById('attendanceTable');
-            
-            if (attendanceRecords.length === 0) {
-                container.innerHTML = '<p>No attendance records found.</p>';
+    function onScanSuccess(decodedText, decodedResult) {
+        // decodedText should be JSON like {"studentId":"..."}
+        try {
+            const qrData = JSON.parse(decodedText);
+            const studentId = qrData.studentId;
+            const student = students.find(s => s.id === studentId);
+            if (!student) {
+                showScanResult('Student not found in database', 'error');
                 return;
             }
 
-            let filteredRecords = [...attendanceRecords];
-            
-            // Apply date filter if set
-            const filterDate = document.getElementById('filterDate')?.value;
-            if (filterDate) {
-                filteredRecords = filteredRecords.filter(record => 
-                    new Date(record.date).toDateString() === new Date(filterDate).toDateString()
-                );
-            }
-
-            // Apply session filter if set
-            const filterSession = document.getElementById('filterSession')?.value;
-            if (filterSession) {
-                filteredRecords = filteredRecords.filter(record => record.session === filterSession);
-            }
-
-            // Sort by date (newest first)
-            filteredRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            const table = document.createElement('table');
-            table.className = 'attendance-table';
-            
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Student ID</th>
-                        <th>Session</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filteredRecords.map(record => `
-                        <tr>
-                            <td>${record.studentName}</td>
-                            <td>${record.studentId}</td>
-                            <td>${record.session}</td>
-                            <td>${new Date(record.date).toLocaleDateString()}</td>
-                            <td>${new Date(record.date).toLocaleTimeString()}</td>
-                            <td class="status-${record.status.toLowerCase()}">${record.status}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            `;
-
-            container.innerHTML = '';
-            container.appendChild(table);
-        }
-
-        function updateSessionFilter() {
-            const select = document.getElementById('filterSession');
-            const sessions = [...new Set(attendanceRecords.map(r => r.session))];
-            
-            select.innerHTML = '<option value="">All Sessions</option>';
-            sessions.forEach(session => {
-                const option = document.createElement('option');
-                option.value = session;
-                option.textContent = session;
-                select.appendChild(option);
-            });
-        }
-
-        function filterAttendance() {
-            updateAttendanceTable();
-        }
-
-        function clearFilters() {
-            document.getElementById('filterDate').value = '';
-            document.getElementById('filterSession').value = '';
-            updateAttendanceTable();
-        }
-
-        // Reports
-        function updateReports() {
-            updateStats();
-            updateIndividualReports();
-        }
-
-        function updateStats() {
-            const container = document.getElementById('statsGrid');
-            const totalStudents = students.length;
-            const totalSessions = new Set(attendanceRecords.map(r => r.session)).size;
-            const todayAttendance = attendanceRecords.filter(r => 
-                new Date(r.date).toDateString() === new Date().toDateString()
-            ).length;
-
-            const avgAttendance = totalSessions > 0 ? 
-                Math.round((attendanceRecords.length / (totalStudents * totalSessions)) * 100) : 0;
-
-            container.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${totalStudents}</div>
-                    <div class="stat-label">Total Students</div>
-                </div>
-                <div class="stat-card">
-                                <div class="stat-number">${totalSessions}</div>
-                    <div class="stat-label">Total Sessions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${todayAttendance}</div>
-                    <div class="stat-label">Today's Attendance</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${avgAttendance}%</div>
-                    <div class="stat-label">Average Attendance</div>
-                </div>
-            `;
-        }
-
-        function updateIndividualReports() {
-            const container = document.getElementById('individualReports');
-            
-            if (students.length === 0) {
-                container.innerHTML = '<p>No students registered yet.</p>';
+            const todayStr = new Date().toDateString();
+            const existing = attendanceRecords.find(r =>
+                r.studentId === studentId &&
+                r.section === currentSection &&
+                new Date(r.date).toDateString() === todayStr
+            );
+            if (existing) {
+                showScanResult(`${student.name} already marked present for this section today`, 'error');
                 return;
             }
 
-            const table = document.createElement('table');
-            table.className = 'attendance-table';
-            
-            const studentStats = students.map(student => {
-                const studentRecords = attendanceRecords.filter(r => r.studentId === student.id);
-                const totalSessions = new Set(attendanceRecords.map(r => r.session)).size;
-                const attendanceRate = totalSessions > 0 ? 
-                    Math.round((studentRecords.length / totalSessions) * 100) : 0;
-
-                return {
-                    ...student,
-                    totalAttendance: studentRecords.length,
-                    attendanceRate: attendanceRate
-                };
-            });
-
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>Student ID</th>
-                        <th>Total Attendance</th>
-                        <th>Attendance Rate</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${studentStats.map(student => `
-                        <tr>
-                            <td>${student.name}</td>
-                            <td>${student.id}</td>
-                            <td>${student.totalAttendance}</td>
-                            <td>${student.attendanceRate}%</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            `;
-
-            container.innerHTML = '';
-            container.appendChild(table);
-        }
-
-        // Save to localStorage
-function saveData() {
-  const data = {
-    students: students,
-    attendanceRecords: attendanceRecords
-  };
-  localStorage.setItem("attendanceData", JSON.stringify(data));
-}
-
-// Load from localStorage
-function loadData() {
-  const saved = localStorage.getItem("attendanceData");
-  if (saved) {
-    const data = JSON.parse(saved);
-    students = data.students || [];
-    attendanceRecords = data.attendanceRecords || [];
-  } else {
-    students = [];
-    attendanceRecords = [];
-  }
-}
-
-            
-            students = window.attendanceData.students || [];
-            attendanceRecords = window.attendanceData.attendanceRecords || [];
-        
-
-        // Export functionality
-        function exportToExcel() {
-            const wb = XLSX.utils.book_new();
-            
-            // Attendance sheet
-            const attendanceData = attendanceRecords.map(record => ({
-                'Student Name': record.studentName,
-                'Student ID': record.studentId,
-                'Session': record.session,
-                'Date': new Date(record.date).toLocaleDateString(),
-                'Time': new Date(record.date).toLocaleTimeString(),
-                'Status': record.status
-                            }));
-            
-            const attendanceWS = XLSX.utils.json_to_sheet(attendanceData);
-            XLSX.utils.book_append_sheet(wb, attendanceWS, 'Attendance Records');
-            
-            // Students sheet
-            const studentsData = students.map(student => ({
-                'Student Name': student.name,
-                'Student ID': student.id,
-                'Email': student.email || '',
-                'Class': student.class || ''
-            }));
-            
-            const studentsWS = XLSX.utils.json_to_sheet(studentsData);
-            XLSX.utils.book_append_sheet(wb, studentsWS, 'Students');
-            
-            // Save file
-            XLSX.writeFile(wb, `Attendance_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-            showMessage('Excel file exported successfully!', 'success');
-        }
-
-        function exportStudents() {
-            const wb = XLSX.utils.book_new();
-            
-            const studentsData = students.map(student => ({
-                'Student Name': student.name,
-                'Student ID': student.id,
-                'Email': student.email || '',
-                'Class': student.class || ''
-            }));
-            
-            const ws = XLSX.utils.json_to_sheet(studentsData);
-            XLSX.utils.book_append_sheet(wb, ws, 'Students');
-            
-            XLSX.writeFile(wb, `Students_List_${new Date().toISOString().split('T')[0]}.xlsx`);
-            showMessage('Student list exported successfully!', 'success');
-        }
-
-        function importStudentData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                    let importedCount = 0;
-                    jsonData.forEach(row => {
-                        const name = row['Student Name'] || row['Name'];
-                        const id = row['Student ID'] || row['ID'];
-                        const email = row['Email'] || '';
-                        const studentClass = row['Class'] || row['Section'] || '';
-
-                        if (name && id && !students.find(s => s.id === id)) {
-                            const student = {
-                                name,
-                                id,
-                                email,
-                                class: studentClass,
-                                qrCode: generateQRData(id)
-                            };
-                            students.push(student);
-                            importedCount++;
-                        }
-                    });
-
-                    saveData();
-                    updateStudentsList();
-                    showMessage(`Successfully imported ${importedCount} students!`, 'success');
-                    
-                } catch (error) {
-                    showMessage('Error importing file. Please check the format.', 'error');
-                }
+            const rec = {
+                studentId,
+                studentName: student.name,
+                section: currentSection,
+                date: new Date().toISOString(),
+                status: 'Present'
             };
-            reader.readAsArrayBuffer(file);
+            attendanceRecords.push(rec);
+            saveData();
+            updateAttendanceTable();
+            updateReports();
+            populateSectionFilter();
+
+            showScanResult(`✅ ${student.name} marked present!`, 'success');
+
+        } catch (e) {
+            showScanResult('Invalid QR code format', 'error');
+        }
+    }
+
+    function onScanFailure(error) {
+        // silent - do not flood
+        //console.debug('scan fail', error);
+    }
+
+    function showScanResult(message, type) {
+        const resultDiv = document.getElementById('scanResult');
+        resultDiv.className = type === 'success' ? 'success-message' : 'error-message';
+        resultDiv.innerHTML = message;
+        setTimeout(() => { resultDiv.innerHTML = ''; }, 3500);
+    }
+
+    // --- Attendance table & filters ---
+    function updateAttendanceTable() {
+        const container = document.getElementById('attendanceTable');
+        if (!attendanceRecords || attendanceRecords.length === 0) {
+            container.innerHTML = '<p>No attendance records found.</p>';
+            return;
         }
 
-        // Utility functions
-        function showMessage(message, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
-            messageDiv.innerHTML = message;
-            
-            // Insert at the top of the active tab
-            const activeTab = document.querySelector('.tab-content.active');
-            activeTab.insertBefore(messageDiv, activeTab.firstChild);
-            
-            setTimeout(() => {
-                messageDiv.remove();
-            }, 5000);
+        let filtered = [...attendanceRecords];
+        const filterDate = document.getElementById('filterDate')?.value;
+        if (filterDate) {
+            filtered = filtered.filter(r => new Date(r.date).toDateString() === new Date(filterDate).toDateString());
+        }
+        const filterSection = document.getElementById('filterSection')?.value;
+        if (filterSection) {
+            filtered = filtered.filter(r => r.section === filterSection);
         }
 
-        // Initialize the app when the page loads
-        window.onload = init;
-    </script>
+        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+        const table = document.createElement('table');
+        table.className = 'attendance-table';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student ID</th>
+                    <th>Section</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filtered.map(r => `
+                    <tr>
+                        <td>${escapeHtml(r.studentName)}</td>
+                        <td>${escapeHtml(r.studentId)}</td>
+                        <td>${escapeHtml(r.section)}</td>
+                        <td>${new Date(r.date).toLocaleDateString()}</td>
+                        <td>${new Date(r.date).toLocaleTimeString()}</td>
+                        <td class="${r.status === 'Present' ? 'status-present' : 'status-absent'}">${escapeHtml(r.status)}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+
+    function filterAttendance() { updateAttendanceTable(); }
+
+    function clearFilters() {
+        document.getElementById('filterDate').value = '';
+        document.getElementById('filterSection').value = '';
+        updateAttendanceTable();
+    }
+
+    // --- Reports ---
+    function updateReports() {
+        updateStats();
+        updateIndividualReports();
+    }
+
+    function updateStats() {
+        const container = document.getElementById('statsGrid');
+        const totalStudents = students.length;
+        const sections = new Set(attendanceRecords.map(r => r.section));
+        const totalSections = sections.size;
+        const todayAttendance = attendanceRecords.filter(r => new Date(r.date).toDateString() === new Date().toDateString()).length;
+        const avgAttendance = (totalSections > 0 && totalStudents > 0) ? Math.round((attendanceRecords.length / (totalStudents * totalSections)) * 100) : 0;
+
+        container.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-number">${totalStudents}</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${totalSections}</div>
+                <div class="stat-label">Total Sections</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${todayAttendance}</div>
+                <div class="stat-label">Today's Attendance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${avgAttendance}%</div>
+                <div class="stat-label">Average Attendance</div>
+            </div>
+        `;
+    }
+
+    function updateIndividualReports() {
+        const container = document.getElementById('individualReports');
+        if (students.length === 0) {
+            container.innerHTML = '<p>No students registered yet.</p>';
+            return;
+        }
+
+        const totalSections = new Set(attendanceRecords.map(r => r.section)).size;
+        const studentStats = students.map(s => {
+            const recs = attendanceRecords.filter(r => r.studentId === s.id);
+            const attendanceRate = totalSections > 0 ? Math.round((recs.length / totalSections) * 100) : 0;
+            return { ...s, totalAttendance: recs.length, attendanceRate };
+        });
+
+        const table = document.createElement('table');
+        table.className = 'attendance-table';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student ID</th>
+                    <th>Total Attendance</th>
+                    <th>Attendance Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${studentStats.map(s => `
+                    <tr>
+                        <td>${escapeHtml(s.name)}</td>
+                        <td>${escapeHtml(s.id)}</td>
+                        <td>${s.totalAttendance}</td>
+                        <td>${s.attendanceRate}%</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+
+    // --- Sections filter list ---
+    function populateSectionFilter() {
+        const select = document.getElementById('filterSection');
+        const sections = Array.from(new Set(attendanceRecords.map(r => r.section).concat(students.map(s => s.class || '').filter(Boolean))));
+        select.innerHTML = '<option value="">All Sections</option>';
+        sections.forEach(sec => {
+            const opt = document.createElement('option');
+            opt.value = sec;
+            opt.textContent = sec;
+            select.appendChild(opt);
+        });
+    }
+
+    // --- Import/Export ---
+    function exportToExcel() {
+        const wb = XLSX.utils.book_new();
+        const attendanceData = attendanceRecords.map(r => ({
+            'Student Name': r.studentName,
+            'Student ID': r.studentId,
+            'Section': r.section,
+            'Date': new Date(r.date).toLocaleDateString(),
+            'Time': new Date(r.date).toLocaleTimeString(),
+            'Status': r.status
+        }));
+        const attendanceWS = XLSX.utils.json_to_sheet(attendanceData);
+        XLSX.utils.book_append_sheet(wb, attendanceWS, 'Attendance Records');
+
+        const studentsData = students.map(s => ({
+            'Student Name': s.name,
+            'Student ID': s.id,
+            'Email': s.email || '',
+            'Class': s.class || ''
+        }));
+        const studentsWS = XLSX.utils.json_to_sheet(studentsData);
+        XLSX.utils.book_append_sheet(wb, studentsWS, 'Students');
+
+        XLSX.writeFile(wb, `Attendance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showMessage('Excel file exported successfully!', 'success');
+    }
+
+    function exportStudents() {
+        const wb = XLSX.utils.book_new();
+        const studentsData = students.map(s => ({
+            'Student Name': s.name,
+            'Student ID': s.id,
+            'Email': s.email || '',
+            'Class': s.class || ''
+        }));
+        const ws = XLSX.utils.json_to_sheet(studentsData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Students');
+        XLSX.writeFile(wb, `Students_List_${new Date().toISOString().slice(0,10)}.xlsx`);
+        showMessage('Student list exported successfully!', 'success');
+    }
+
+    function importStudentData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                let imported = 0;
+                jsonData.forEach(row => {
+                    const name = row['Student Name'] || row['Name'];
+                    const id = row['Student ID'] || row['ID'];
+                    const email = row['Email'] || '';
+                    const cls = row['Class'] || row['Section'] || '';
+                    if (name && id && !students.find(s => s.id === id)) {
+                        students.push({ name, id, email, class: cls, qrCode: generateQRData(id) });
+                        imported++;
+                    }
+                });
+                saveData();
+                updateStudentsList();
+                populateSectionFilter();
+                showMessage(`Imported ${imported} students.`, 'success');
+            } catch (err) {
+                console.error(err);
+                showMessage('Error importing file. Check format.', 'error');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // --- Utilities ---
+    function showMessage(message, type) {
+        const active = document.querySelector('.tab-content.active');
+        if (!active) return;
+        const msg = document.createElement('div');
+        msg.className = type === 'success' ? 'success-message' : 'error-message';
+        msg.innerHTML = message;
+        active.insertBefore(msg, active.firstChild);
+        setTimeout(() => msg.remove(), 4500);
+    }
+
+    function escapeHtml(str) {
+        if (!str && str !== 0) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // initialize
+    window.addEventListener('load', init);
+</script>
 </body>
 </html>
