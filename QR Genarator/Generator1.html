@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student QR Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background:#f4f6f9; padding:30px; text-align:center; }
     h1 { margin-bottom:20px; }
@@ -31,7 +31,7 @@
   </div>
 
   <script>
-    let lastCanvas = null;
+    let qr = null;
 
     function generateQR() {
       const name = document.getElementById("name").value.trim();
@@ -44,37 +44,35 @@
         return;
       }
 
-      // Data encoded inside QR
+      // Info encoded into QR
       const studentData = {
         name: name,
         grade: grade,
         lrn: lrn,
         email: email
       };
-
       const qrText = JSON.stringify(studentData);
 
-      const qrContainer = document.getElementById("qrcode");
-      qrContainer.innerHTML = ""; // clear previous
-      lastCanvas = null;
+      // Clear old QR
+      document.getElementById("qrcode").innerHTML = "";
 
-      QRCode.toCanvas(qrText, { width: 220 }, function (err, canvas) {
-        if (err) {
-          console.error(err);
-          alert("Error generating QR");
-          return;
-        }
-        qrContainer.appendChild(canvas);
-        lastCanvas = canvas;
-        document.getElementById("downloadBtn").style.display = "inline-block";
+      // Generate new QR
+      qr = new QRCode(document.getElementById("qrcode"), {
+        text: qrText,
+        width: 220,
+        height: 220
       });
+
+      document.getElementById("downloadBtn").style.display = "inline-block";
     }
 
     function downloadQR() {
-      if (!lastCanvas) return;
+      const qrCanvas = document.querySelector("#qrcode canvas");
+      if (!qrCanvas) return;
+
       const link = document.createElement("a");
       link.download = "student_qr.png";
-      link.href = lastCanvas.toDataURL("image/png");
+      link.href = qrCanvas.toDataURL("image/png");
       link.click();
     }
   </script>
