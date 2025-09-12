@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Attendance System</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f9; margin:0; }
+    nav { background:#800000; padding:10px; display:flex; }
+    nav button { flex:1; padding:12px; border:none; color:white; background:#800000; cursor:pointer; font-size:16px; }
+    nav button:hover { background:#5a0000; }
+    .tab { display:none; padding:20px; }
+    .active { display:block; }
+    .form { max-width:400px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+    input { padding:10px; width:100%; border:1px solid #ccc; border-radius:6px; margin-bottom:12px; font-size:15px; }
+    button { padding:10px 20px; border:none; border-radius:6px; background:#800000; color:#fff; cursor:pointer; font-size:15px; }
+    button:hover { background:#5a0000; }
+    table { width:100%; border-collapse:collapse; margin-top:15px; background:white; }
+    th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+    th { background:#800000; color:white; }
+    #qrcode { margin-top:20px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <button onclick="openTab('generator')">Students</button>
+    <button onclick="openTab('scanner')">Scanner</button>
+    <button onclick="openTab('attendance')">Attendance</button>
+    <button onclick="openTab('reports')">Reports</button>
+    <button onclick="exportToExcel()">Export</button>
+  </nav>
+
+  <!-- Student Generator -->
+  <div id="generator" class="tab active">
+    <h2>Register Student & Generate QR</h2>
+    <div class="form">
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="number" id="age" placeholder="Age" required>
+      <input type="text" id="grade" placeholder="Grade & Section" required>
+      <input type="text" id="lrn" placeholder="LRN (12 digits)" maxlength="12" required>
+      <input type="email" id="email" placeholder="Email Address" required>
+      <button onclick="generateQR()">Generate QR</button>
+      <div id="qrcode"></div>
+      <button id="downloadBtn" style="display:none;" onclick="downloadQR()">Download QR</button>
+    </div>
+    <h3>Registered Students</h3>
+    <div id="studentTable"></div>
+  </div>
+
+  <!-- Scanner -->
+  <div id="scanner" class="tab">
+    <h2>QR Scanner</h2>
+    <div id="reader" style="width:400px;margin:auto;"></div>
+    <p id="scanResult"></p>
+  </div>
+
+  <!-- Attendance -->
+  <div id="attendance" class="tab">
+    <h2>Attendance Records</h2>
+    <div id="attendanceTable"></div>
+  </div>
+
+  <!-- Reports -->
+  <div id="reports" class="tab">
+    <h2>Reports</h2>
+    <div id="reportTable"></div>
+  </div>
+
+  <script>
+    let lastCanvas = null;
+    let students = JSON.parse(localStorage.getItem("students") || "[]");
+    let attendanceRecords = JSON.parse(localStorage.getItem("attendanceRecords") || "[]");
+
+    function saveStudents() {
+      localStorage.setItem("students", JSON.stringify(students));
+    }
+    function saveAttendance() {
+      localStorage.setItem("attendanceRecords", JSON.stringify(attendanceRecords));
+    }
+
+    function openTab(id) {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      if (id === "generator") updateStudentTable();
+      if (id === "attendance") updateAttendanceTable();
+      if (id === "reports") updateReports();
+    }
+
+    // Student QR Generator
+    function generateQR() {
+      const name = document.getElementById("name").value.trim();
+      const age = document.getElementById("age").value.trim();
+      const grade = document.getElementById("grade").value.trim();
+      const lrn = document.getElementById("lrn").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      if (!name || !age || !grade || !lrn || !email) {
+        alert("Please fill in all fields");
+        return;
+      }
+      if (!/^\d{12}$/.test(lrn)) {
+        alert("LRN must be exactly 12 digits");
+        return;
+      }
+
+      const studentData = { name, age, grade, lrn, email };
+      if (!students.find(s => s.lrn === lrn)) {
+        students.push(studentData);
+        saveStudents();
+      }
+
+      const qrContainer = document.getElementById("qrcode");
+      qrContainer.innerHTML = "";
+      lastCanvas = null;
+
+      const qr = new QRCode(qrContainer, {
+        text: JSON.stringify(studentData),
+        width: 220,
+        height: 220
+      });
+
+      setTimeout(() => {
+        lastCanvas = qrContainer.querySelector("canvas");
+        document.getElementById("downloadBtn").style.display = "inline-block";
+      }, 500);
+
+      updateStudentTable();
+    }
+
+    function downloadQR() {
+      if (!lastCanvas) return;
+      const link = document.createElement("a");
+      link.download = "student_qr.png";
+      link.href = lastCanvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function updateStudentTable() {
+      const container = document.getElementById("studentTable");
+      if (!students.length) {
+        container.innerHTML = "<p>No students registered yet.</p>";
+        return;
+      }
+      const rows = students.map(s => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.age}</td>
+          <td>${s.lrn}</td>
+          <td>${s.grade}</td>
+          <td>${s.email}</td>
+        </tr>
+      `).join("");
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Age</th><th>LRN</th><th>Grade & Section</th><th>Email</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // Scanner
+    function onScanSuccess(decodedText) {
+      try {
+        const data = JSON.parse(decodedText);
+        const student = students.find(s => s.lrn === data.lrn);
+        if (!student) {
+          document.getElementById("scanResult").innerText = "❌ Student not found";
+          return;
+        }
+
+        const today = new Date().toLocaleDateString();
+        let rec = attendanceRecords.find(r => r.lrn === data.lrn && r.date === today);
+
+        if (!rec) {
+          rec = { ...student, date: today, timeIn: new Date().toLocaleTimeString(), timeOut: "" };
+          attendanceRecords.push(rec);
+          document.getElementById("scanResult").innerText = `✅ ${student.name} - Time In recorded`;
+        } else if (!rec.timeOut) {
+          rec.timeOut = new Date().toLocaleTimeString();
+          document.getElementById("scanResult").innerText = `✅ ${student.name} - Time Out recorded`;
+        } else {
+          document.getElementById("scanResult").innerText = `⚠️ ${student.name} already has Time In & Time Out`;
+        }
+
+        saveAttendance();
+        updateAttendanceTable();
+        updateReports();
+      } catch {
+        document.getElementById("scanResult").innerText = "❌ Invalid QR code";
+      }
+    }
+
+    // Attendance Table
+    function updateAttendanceTable() {
+      const container = document.getElementById("attendanceTable");
+      if (!attendanceRecords.length) {
+        container.innerHTML = "<p>No records yet.</p>";
+        return;
+      }
+      const rows = attendanceRecords.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.age}</td>
+          <td>${r.lrn}</td>
+          <td>${r.grade}</td>
+          <td>${r.email}</td>
+          <td>${r.date}</td>
+          <td>${r.timeIn}</td>
+          <td>${r.timeOut}</td>
+        </tr>
+      `).join("");
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Age</th><th>LRN</th><th>Grade & Section</th><th>Email</th>
+              <th>Date</th><th>Time In</th><th>Time Out</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // Reports
+    function updateReports() {
+      const container = document.getElementById("reportTable");
+      if (!attendanceRecords.length) {
+        container.innerHTML = "<p>No records yet.</p>";
+        return;
+      }
+      const rows = attendanceRecords.map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.age}</td>
+          <td>${r.lrn}</td>
+          <td>${r.grade}</td>
+          <td>${r.email}</td>
+          <td>${r.date}</td>
+          <td>${r.timeIn}</td>
+          <td>${r.timeOut}</td>
+        </tr>
+      `).join("");
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Age</th><th>LRN</th><th>Grade & Section</th><th>Email</th>
+              <th>Date</th><th>Time In</th><th>Time Out</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // Export
+    function exportToExcel() {
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(attendanceRecords);
+      XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+      XLSX.writeFile(wb, "Attendance.xlsx");
+    }
+
+    // Init QR Scanner
+    new Html5QrcodeScanner("reader", { fps:10, qrbox:250 }).render(onScanSuccess);
+  </script>
+</body>
+</html>
