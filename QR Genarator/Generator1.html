@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student QR Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+  <!-- ✅ Correct QRCode library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background:#f4f6f9; padding:30px; text-align:center; }
     h1 { margin-bottom:20px; }
@@ -13,8 +14,8 @@
     button { padding:10px 20px; border:none; border-radius:6px; background:#007bff; color:#fff; cursor:pointer; font-size:15px; }
     button:hover { background:#0056b3; }
     #qrcode { margin-top:20px; }
-    #downloadBtn { display:none; margin-top:10px; background:#28a745; }
-    #downloadBtn:hover { background:#1e7e34; }
+    #downloadBtn { display:none; margin-top:10px; background:#800000; }
+    #downloadBtn:hover { background:#600000; }
   </style>
 </head>
 <body>
@@ -31,7 +32,7 @@
   </div>
 
   <script>
-    let lastCanvas = null;
+    let qrcode = null;
 
     function generateQR() {
       const name = document.getElementById("name").value.trim();
@@ -39,7 +40,6 @@
       const lrn = document.getElementById("lrn").value.trim();
       const email = document.getElementById("email").value.trim();
 
-      // ✅ Validation
       if (!name || !grade || !lrn || !email) {
         alert("Please fill in all fields");
         return;
@@ -49,33 +49,33 @@
         return;
       }
 
-      // Encode student info in JSON
+      // Encode student info as JSON
       const studentData = { name, grade, lrn, email };
       const qrText = JSON.stringify(studentData);
 
       // Clear old QR
-      const qrContainer = document.getElementById("qrcode");
-      qrContainer.innerHTML = "";
-      lastCanvas = null;
+      document.getElementById("qrcode").innerHTML = "";
 
       // Generate QR
-      QRCode.toCanvas(qrText, { width: 220 }, function (err, canvas) {
-        if (err) {
-          console.error(err);
-          alert("Error generating QR");
-          return;
-        }
-        qrContainer.appendChild(canvas);
-        lastCanvas = canvas;
-        document.getElementById("downloadBtn").style.display = "inline-block";
+      qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: qrText,
+        width: 220,
+        height: 220
       });
+
+      document.getElementById("downloadBtn").style.display = "inline-block";
     }
 
     function downloadQR() {
-      if (!lastCanvas) return;
+      if (!qrcode) return;
+      const qrCanvas = document.querySelector("#qrcode canvas");
+      if (!qrCanvas) {
+        alert("No QR code to download!");
+        return;
+      }
       const link = document.createElement("a");
       link.download = "student_qr.png";
-      link.href = lastCanvas.toDataURL("image/png");
+      link.href = qrCanvas.toDataURL("image/png");
       link.click();
     }
   </script>
