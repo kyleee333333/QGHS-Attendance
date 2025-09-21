@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You My Love</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffebee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            color: #e91e63;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        .heart {
+            width: 100px;
+            height: 90px;
+            position: relative;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .heart:before, .heart:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 50px;
+            height: 80px;
+            background: #e91e63;
+            border-radius: 50px 50px 0 0;
+            box-shadow: 0 0 20px rgba(233, 30, 99, 0.6);
+        }
+        
+        .heart:before {
+            left: 50px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+        
+        .heart:after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+        
+        .heart:hover {
+            transform: scale(1.2);
+        }
+        
+        .message {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            margin: 30px auto;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+        
+        .message h2 {
+            color: #e91e63;
+            margin-top: 0;
+        }
+        
+        .message p {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .tiny-heart {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #ff4081;
+            opacity: 0;
+            animation: float 4s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Click the Heart ❤️</h1>
+        <div class="heart" onclick="showMessage()"></div>
+        
+        <div class="message" id="message">
+            <h2>I love you so much!</h2>
+            <p>Every moment with you feels like a beautiful dream I never want to wake up from. Your smile brightens my darkest days, and your love fills my heart with endless joy. I cherish every laugh we share, every conversation we have, and every second we spend together.</p>
+            <p>You are my sunshine on cloudy days, my comfort when I'm down, and my greatest happiness. No matter what life brings, knowing I have you by my side makes everything better. I love you more than words can express, more than time can measure, and more than my heart can contain.</p>
+        </div>
+    </div>
+    
+    <div class="hearts" id="hearts"></div>
+    
+    <script>
+        function showMessage() {
+            const message = document.getElementById('message');
+            const heartsContainer = document.getElementById('hearts');
+            
+            // Toggle message visibility
+            if (message.style.display === 'block') {
+                message.style.display = 'none';
+            } else {
+                message.style.display = 'block';
+                
+                // Create floating hearts
+                for (let i = 0; i < 20; i++) {
+                    createHeart();
+                }
+            }
+        }
+        
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('tiny-heart');
+            
+            // Random position
+            const xPos = Math.random() * window.innerWidth;
+            const delay = Math.random() * 5;
+            
+            heart.style.left = `${xPos}px`;
+            heart.style.bottom = '-20px';
+            heart.style.animationDelay = `${delay}s`;
+            
+            // Random size
+            const size = Math.random() * 10 + 5;
+            heart.style.width = `${size}px`;
+            heart.style.height = `${size}px`;
+            
+            // Random color
+            const colors = ['#ff4081', '#e91e63', '#ff80ab', '#f50057'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            heart.style.backgroundColor = randomColor;
+            
+            document.getElementById('hearts').appendChild(heart);
+            
+            // Remove heart after animation
+            setTimeout(() => {
+                heart.remove();
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
