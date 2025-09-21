@@ -1,225 +1,94 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Purple Flower Animation</title>
 <style>
-  :root{
-    --bg1: #0f0726;
-    --bg2: #2b083b;
-    --deep: #5b1f7a;
-    --mid: #8a36c4;
-    --light: #cfa6ff;
-    --accent: #ff9de2;
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #2a003f, #0d0018);
   }
 
-  html,body{
-    height:100%;
-    margin:0;
-    display:grid;
-    place-items:center;
-    background: radial-gradient(1200px 800px at 10% 10%, rgba(255,255,255,0.03), transparent),
-                linear-gradient(180deg,var(--bg1), var(--bg2));
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    color:#fff;
+  .flower {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    animation: float 8s ease-in-out infinite;
   }
 
-  .scene{
-    width:min(420px, 90vw);
-    aspect-ratio:1/1;
-    display:grid;
-    place-items:center;
-    filter: drop-shadow(0 12px 30px rgba(20,10,40,0.6));
-    cursor: pointer;
+  .petal {
+    position: absolute;
+    width: 80px;
+    height: 120px;
+    background: radial-gradient(circle at 30% 30%, #e2b9ff, #8e3dcc, #3b0a66);
+    border-radius: 50% 50% 50% 50%;
+    top: 40px;
+    left: 60px;
+    transform-origin: 50% 100%;
+    opacity: 0;
+    animation: bloom 1s forwards, sway 5s ease-in-out infinite 1s;
   }
 
-  svg{ width:100%; height:100%; overflow:visible; }
+  /* Position petals in a circle */
+  .petal:nth-child(1) { transform: rotate(0deg) translateY(-60px); animation-delay: 0s; }
+  .petal:nth-child(2) { transform: rotate(45deg) translateY(-60px); animation-delay: 0.1s; }
+  .petal:nth-child(3) { transform: rotate(90deg) translateY(-60px); animation-delay: 0.2s; }
+  .petal:nth-child(4) { transform: rotate(135deg) translateY(-60px); animation-delay: 0.3s; }
+  .petal:nth-child(5) { transform: rotate(180deg) translateY(-60px); animation-delay: 0.4s; }
+  .petal:nth-child(6) { transform: rotate(225deg) translateY(-60px); animation-delay: 0.5s; }
+  .petal:nth-child(7) { transform: rotate(270deg) translateY(-60px); animation-delay: 0.6s; }
+  .petal:nth-child(8) { transform: rotate(315deg) translateY(-60px); animation-delay: 0.7s; }
 
-  /* Petal styling */
-  .petal{
-    transform-origin: 50% 80%;
-    opacity:0;
-    animation: bloom 900ms cubic-bezier(.2,.9,.25,1) forwards;
+  /* Flower center */
+  .center {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #ffccf5, #ff5dc2);
+    border-radius: 50%;
+    top: 60px;
+    left: 60px;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 20px rgba(255,150,220,0.7);
   }
 
-  /* stagger bloom so it looks natural */
-  .petal:nth-child(1){ animation-delay: 0ms; }
-  .petal:nth-child(2){ animation-delay: 60ms; }
-  .petal:nth-child(3){ animation-delay: 120ms; }
-  .petal:nth-child(4){ animation-delay: 180ms; }
-  .petal:nth-child(5){ animation-delay: 240ms; }
-  .petal:nth-child(6){ animation-delay: 300ms; }
-  .petal:nth-child(7){ animation-delay: 360ms; }
-  .petal:nth-child(8){ animation-delay: 420ms; }
-
-  /* slow sway after bloom */
-  .petal.sway{
-    animation: bloom 900ms cubic-bezier(.2,.9,.25,1) forwards,
-               sway 6s ease-in-out -680ms infinite;
+  @keyframes bloom {
+    0% { transform: scale(0.1) rotate(var(--angle,0deg)) translateY(-60px); opacity: 0; }
+    100% { transform: scale(1) rotate(var(--angle,0deg)) translateY(-60px); opacity: 1; }
   }
 
-  @keyframes bloom{
-    0%   { transform: scale(0.02) translateY(40px) rotate(0deg); opacity:0; }
-    60%  { transform: scale(1.05) translateY(-6px) rotate(0deg); opacity:1; }
-    100% { transform: scale(1) translateY(0) rotate(0deg); opacity:1; }
+  @keyframes sway {
+    0%, 100% { transform: rotate(var(--angle,0deg)) translateY(-60px) rotate(0deg); }
+    50% { transform: rotate(var(--angle,0deg)) translateY(-60px) rotate(4deg); }
   }
 
-  @keyframes sway{
-    0%   { transform: translateX(0) translateY(0) rotate(0deg); }
-    25%  { transform: translateX(2px) translateY(-3px) rotate(1.2deg); }
-    50%  { transform: translateX(0) translateY(0) rotate(0deg); }
-    75%  { transform: translateX(-2px) translateY(3px) rotate(-1.2deg); }
-    100% { transform: translateX(0) translateY(0) rotate(0deg); }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
   }
 
-  /* center disk pulse */
-  .center{
-    transform-origin:center;
-    animation: pulse 1900ms ease-in-out 400ms infinite;
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
-
-  @keyframes pulse{
-    0%   { transform: scale(0.96); opacity:0.95; }
-    50%  { transform: scale(1.06); opacity:1; }
-    100% { transform: scale(0.96); opacity:0.95; }
-  }
-
-  /* subtle rotation of whole flower */
-  .flower{
-    transform-origin:center;
-    animation: float 9s ease-in-out infinite;
-  }
-
-  @keyframes float{
-    0%   { transform: translateY(0) rotate(-1deg); }
-    50%  { transform: translateY(-8px) rotate(1deg); }
-    100% { transform: translateY(0) rotate(-1deg); }
-  }
-
-  /* glow halo */
-  .glow {
-    mix-blend-mode: screen;
-    filter: blur(10px);
-    opacity: 0.55;
-  }
-
-  /* small caption */
-  .hint{
-    font-size:12px;
-    opacity:.65;
-    text-align:center;
-    margin-top:12px;
-    user-select:none;
-  }
-
-  /* when tapped / clicked, retrigger bloom */
-  .re-bloom .petal { animation: none; opacity:0; }
-  .re-bloom .petal.sway { animation: none; opacity:0; }
-  /* Trigger reflow animation by removing class in JS then re-adding. */
 </style>
 </head>
 <body>
-  <div class="scene" id="scene" title="Click to re-bloom">
-    <!-- SVG flower -->
-    <svg viewBox="-120 -120 240 240" preserveAspectRatio="xMidYMid meet" aria-hidden="true" role="img">
-      <defs>
-        <radialGradient id="petalGrad" cx="40%" cy="25%">
-          <stop offset="0%" stop-color="#e8d0ff"/>
-          <stop offset="45%" stop-color="#b58ae6"/>
-          <stop offset="100%" stop-color="#4b1670"/>
-        </radialGradient>
-
-        <radialGradient id="centerGrad" cx="30%" cy="30%">
-          <stop offset="0%" stop-color="#fff7f6"/>
-          <stop offset="40%" stop-color="#ffd4ec"/>
-          <stop offset="100%" stop-color="#ff9de2"/>
-        </radialGradient>
-
-        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="6" result="b"/>
-          <feMerge>
-            <feMergeNode in="b"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-
-        <!-- petal path: draws a rounded tear shape -->
-        <path id="petalPath" d="M0 0 C 18 -6, 34 -44, 0 -80 C -34 -44, -18 -6, 0 0 Z" />
-      </defs>
-
-      <!-- group for whole flower so we can float it -->
-      <g class="flower" transform="translate(0, 10)">
-        <!-- soft halo behind -->
-        <ellipse cx="0" cy="6" rx="72" ry="34" fill="#25102b" class="glow" opacity="0.12"/>
-
-        <!-- petals rotated around center -->
-        <g transform="translate(0,0)">
-          <!-- create 8 petals by rotating the same path -->
-          <!-- Use <use> so CSS nth-child matches ordering -->
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(0)"/>
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(45)"/>
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(90)"/>
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(135)"/>
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(180)"/>
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(225)"/>
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(270)"/>
-          <use class="petal sway" href="#petalPath" x="0" y="0" fill="url(#petalGrad)" transform="rotate(315)"/>
-        </g>
-
-        <!-- center circle -->
-        <g>
-          <!-- subtle glow behind center -->
-          <circle cx="0" cy="0" r="26" fill="url(#centerGrad)" class="center" style="filter:url(#softGlow)"/>
-          <!-- small ring -->
-          <circle cx="0" cy="0" r="12" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.6" />
-        </g>
-
-        <!-- tiny inner sparkles -->
-        <g transform="translate(0,-58)">
-          <circle cx="-12" cy="-6" r="1.8" fill="#fff" opacity="0.9"/>
-          <circle cx="9" cy="2" r="1.5" fill="#fff" opacity="0.9"/>
-          <circle cx="4" cy="-10" r="1.2" fill="#fff" opacity="0.85"/>
-        </g>
-      </g>
-    </svg>
+  <div class="flower">
+    <div class="petal" style="--angle:0deg;"></div>
+    <div class="petal" style="--angle:45deg;"></div>
+    <div class="petal" style="--angle:90deg;"></div>
+    <div class="petal" style="--angle:135deg;"></div>
+    <div class="petal" style="--angle:180deg;"></div>
+    <div class="petal" style="--angle:225deg;"></div>
+    <div class="petal" style="--angle:270deg;"></div>
+    <div class="petal" style="--angle:315deg;"></div>
+    <div class="center"></div>
   </div>
-
-  <div class="hint">Click the flower to re-bloom ✨</div>
-
-<script>
-  // small helper: clicking the scene retriggers the bloom animation
-  const scene = document.getElementById('scene');
-  scene.addEventListener('click', () => {
-    // toggle a class that momentarily resets animations
-    scene.classList.remove('re-bloom');
-    // force reflow then re-add to restart CSS animations
-    void scene.offsetWidth;
-    scene.classList.add('re-bloom');
-
-    // after a tiny delay, remove the "re-bloom" class and add 'sway' back to petals
-    // so the bloom sequence (with staggered delays) runs again, then the swaying continues.
-    setTimeout(() => {
-      // re-add sway class to each petal and allow animations to run
-      const uses = scene.querySelectorAll('.petal');
-      uses.forEach((u, i) => {
-        // force them to re-apply the sway class so bloom -> sway works each click
-        u.classList.remove('sway');
-        void u.offsetWidth;
-        // add it back with a slight stagger (keeps nth-child delays intact)
-        setTimeout(()=> u.classList.add('sway'), i * 12);
-      });
-      scene.classList.remove('re-bloom');
-    }, 30);
-  });
-
-  // On first load: ensure petals get the 'sway' class so they animate.
-  window.addEventListener('load', () => {
-    const uses = scene.querySelectorAll('.petal');
-    uses.forEach((u, i) => {
-      setTimeout(()=> u.classList.add('sway'), i * 60 + 10);
-    });
-  });
-</script>
 </body>
 </html>
