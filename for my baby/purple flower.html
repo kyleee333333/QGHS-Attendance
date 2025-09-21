@@ -19,6 +19,8 @@
     width: 200px;
     height: 200px;
     animation: float 8s ease-in-out infinite;
+    filter: hue-rotate(0deg);
+    animation: float 8s ease-in-out infinite, colorShift 12s linear infinite;
   }
 
   .petal {
@@ -31,18 +33,19 @@
     left: 60px;
     transform-origin: 50% 100%;
     opacity: 0;
-    animation: bloom 1s forwards, sway 5s ease-in-out infinite 1s;
+    animation: bloom 1s forwards, sway 5s ease-in-out infinite;
+    animation-delay: var(--delay);
   }
 
-  /* Position petals in a circle */
-  .petal:nth-child(1) { transform: rotate(0deg) translateY(-60px); animation-delay: 0s; }
-  .petal:nth-child(2) { transform: rotate(45deg) translateY(-60px); animation-delay: 0.1s; }
-  .petal:nth-child(3) { transform: rotate(90deg) translateY(-60px); animation-delay: 0.2s; }
-  .petal:nth-child(4) { transform: rotate(135deg) translateY(-60px); animation-delay: 0.3s; }
-  .petal:nth-child(5) { transform: rotate(180deg) translateY(-60px); animation-delay: 0.4s; }
-  .petal:nth-child(6) { transform: rotate(225deg) translateY(-60px); animation-delay: 0.5s; }
-  .petal:nth-child(7) { transform: rotate(270deg) translateY(-60px); animation-delay: 0.6s; }
-  .petal:nth-child(8) { transform: rotate(315deg) translateY(-60px); animation-delay: 0.7s; }
+  /* Place petals in a circle */
+  .petal:nth-child(1) { --angle: 0deg;   --delay: 0s;   }
+  .petal:nth-child(2) { --angle: 45deg;  --delay: 0.1s; }
+  .petal:nth-child(3) { --angle: 90deg;  --delay: 0.2s; }
+  .petal:nth-child(4) { --angle: 135deg; --delay: 0.3s; }
+  .petal:nth-child(5) { --angle: 180deg; --delay: 0.4s; }
+  .petal:nth-child(6) { --angle: 225deg; --delay: 0.5s; }
+  .petal:nth-child(7) { --angle: 270deg; --delay: 0.6s; }
+  .petal:nth-child(8) { --angle: 315deg; --delay: 0.7s; }
 
   /* Flower center */
   .center {
@@ -57,37 +60,43 @@
     box-shadow: 0 0 20px rgba(255,150,220,0.7);
   }
 
+  /* Animations */
   @keyframes bloom {
-    0% { transform: scale(0.1) rotate(var(--angle,0deg)) translateY(-60px); opacity: 0; }
-    100% { transform: scale(1) rotate(var(--angle,0deg)) translateY(-60px); opacity: 1; }
+    0% { transform: scale(0.1) rotate(var(--angle)) translateY(-60px); opacity: 0; }
+    100% { transform: scale(1) rotate(var(--angle)) translateY(-60px); opacity: 1; }
   }
 
   @keyframes sway {
-    0%, 100% { transform: rotate(var(--angle,0deg)) translateY(-60px) rotate(0deg); }
-    50% { transform: rotate(var(--angle,0deg)) translateY(-60px) rotate(4deg); }
+    0%, 100% { transform: rotate(var(--angle)) translateY(-60px) rotate(0deg); }
+    50% { transform: rotate(var(--angle)) translateY(-60px) rotate(5deg); }
   }
 
   @keyframes pulse {
-    0%,100% { transform: scale(1); }
+    0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
   }
 
   @keyframes float {
-    0%,100% { transform: translateY(0); }
+    0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
+  }
+
+  @keyframes colorShift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
   }
 </style>
 </head>
 <body>
   <div class="flower">
-    <div class="petal" style="--angle:0deg;"></div>
-    <div class="petal" style="--angle:45deg;"></div>
-    <div class="petal" style="--angle:90deg;"></div>
-    <div class="petal" style="--angle:135deg;"></div>
-    <div class="petal" style="--angle:180deg;"></div>
-    <div class="petal" style="--angle:225deg;"></div>
-    <div class="petal" style="--angle:270deg;"></div>
-    <div class="petal" style="--angle:315deg;"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
     <div class="center"></div>
   </div>
 </body>
