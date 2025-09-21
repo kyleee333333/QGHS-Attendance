@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For You My Love</title>
+    <title>Happy 1st Monthsary!</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -13,6 +13,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            flex-direction: column;
             overflow: hidden;
         }
         
@@ -23,8 +24,9 @@
         
         h1 {
             color: #e91e63;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
             margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.5s ease;
         }
         
         .heart {
@@ -33,8 +35,7 @@
             position: relative;
             margin: 0 auto;
             cursor: pointer;
-            transition: transform 0.3s;
-            animation: pulse 1.5s infinite;
+            animation: float 2s ease-in-out infinite;
         }
         
         .heart:before, .heart:after {
@@ -61,19 +62,23 @@
         }
         
         .heart:hover {
-            transform: scale(1.2);
+            transform: scale(1.1);
+        }
+        
+        .heart:active {
+            transform: scale(0.9);
         }
         
         .message {
             display: none;
             background-color: white;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: 30px;
             max-width: 400px;
-            margin: 30px auto;
             position: relative;
-            animation: fadeIn 0.5s;
+            animation: fadeIn 0.5s ease-out;
         }
         
         .message h2 {
@@ -94,102 +99,132 @@
             z-index: -1;
         }
         
-        .tiny-heart {
+        .heart-particle {
             position: absolute;
-            width: 15px;
-            height: 15px;
-            background-color: #ff4081;
+            font-size: 20px;
+            color: #e91e63;
             opacity: 0;
-            animation: float 4s linear infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            animation: float-up 4s linear infinite;
         }
         
         @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0;
+            0%, 100% {
+                transform: translateY(0);
             }
-            10% {
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
                 opacity: 1;
             }
             100% {
-                transform: translateY(-100vh) rotate(360deg);
+                transform: translateY(-100px) rotate(360deg);
                 opacity: 0;
+            }
+        }
+        
+        .flowers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .flower {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.6;
+            animation: sway 3s ease-in-out infinite;
+        }
+        
+        @keyframes sway {
+            0%, 100% {
+                transform: rotate(-5deg);
+            }
+            50% {
+                transform: rotate(5deg);
             }
         }
     </style>
 </head>
 <body>
+    <div class="hearts" id="hearts"></div>
+    <div class="flowers" id="flowers"></div>
+    
     <div class="container">
-        <h1>Click the Heart ❤️</h1>
-        <div class="heart" onclick="showMessage()"></div>
+        <h1 id="title">Click the Heart ❤️</h1>
+        
+        <div class="heart" id="heart"></div>
         
         <div class="message" id="message">
-            <h2>I love you so much Aziee!</h2>
-            <p>Every moment with you feels like a beautiful dream I never want to wake up from. Your smile brightens my darkest days, and your love fills my heart with endless joy. I cherish every laugh we share, every conversation we have, and every second we spend together.</p>
-            <p>You are my sunshine on cloudy days, my comfort when I'm down, and my greatest happiness. No matter what life brings, knowing I have you by my side makes everything better. I love you more than words can express, more than time can measure, and more than my heart can contain.</p>
+            <h2>I love you so much Baby!</h2>
+            <p>Happy 1st monthsary, my love! These past 30 days with you have been the most wonderful days of my life. Every moment with you feels like a beautiful dream that I never want to wake up from.</p>
+            <p>You've brought so much happiness into my life in such a short time. I can't wait to celebrate many more monthsaries with you, watching our love grow stronger each day. You mean everything to me, and I cherish you more than words can express.</p>
         </div>
     </div>
-    
-    <div class="hearts" id="hearts"></div>
-    
+
     <script>
-        function showMessage() {
-            const message = document.getElementById('message');
-            const heartsContainer = document.getElementById('hearts');
-            
-            // Toggle message visibility
-            if (message.style.display === 'block') {
-                message.style.display = 'none';
-            } else {
-                message.style.display = 'block';
-                
-                // Create floating hearts
-                for (let i = 0; i < 20; i++) {
-                    createHeart();
-                }
-            }
+        const heart = document.getElementById('heart');
+        const message = document.getElementById('message');
+        const title = document.getElementById('title');
+        const heartsContainer = document.getElementById('hearts');
+        const flowersContainer = document.getElementById('flowers');
+        
+        // Create random flowers around the page
+        const flowerEmojis = ['🌸', '🌹', '🌺', '🌻', '🌼', '🏵️', '🌷'];
+        for (let i = 0; i < 20; i++) {
+            const flower = document.createElement('div');
+            flower.className = 'flower';
+            flower.innerHTML = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+            flower.style.left = `${Math.random() * 100}vw`;
+            flower.style.top = `${Math.random() * 100}vh`;
+            flower.style.animationDelay = `${Math.random() * 3}s`;
+            flowersContainer.appendChild(flower);
         }
         
-        function createHeart() {
-            const heart = document.createElement('div');
-            heart.classList.add('tiny-heart');
+        heart.addEventListener('click', function() {
+            // Show message
+            message.style.display = 'block';
+            title.innerHTML = 'Happy 1st Monthsary Baby!!!';
             
-            // Random position
-            const xPos = Math.random() * window.innerWidth;
-            const delay = Math.random() * 5;
+            // Create heart particles
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const heartParticle = document.createElement('div');
+                    heartParticle.className = 'heart-particle';
+                    heartParticle.innerHTML = '❤️';
+                    heartParticle.style.left = `${50 + (Math.random() - 0.5) * 100}px`;
+                    heartParticle.style.animationDuration = `${2 + Math.random() * 3}s`;
+                    heartsContainer.appendChild(heartParticle);
+                    
+                    // Remove heart after animation
+                    setTimeout(() => {
+                        heartParticle.remove();
+                    }, 4000);
+                }, i * 100);
+            }
             
-            heart.style.left = `${xPos}px`;
-            heart.style.bottom = '-20px';
-            heart.style.animationDelay = `${delay}s`;
-            
-            // Random size
-            const size = Math.random() * 10 + 5;
-            heart.style.width = `${size}px`;
-            heart.style.height = `${size}px`;
-            
-            // Random color
-            const colors = ['#ff4081', '#e91e63', '#ff80ab', '#f50057'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            heart.style.backgroundColor = randomColor;
-            
-            document.getElementById('hearts').appendChild(heart);
-            
-            // Remove heart after animation
-            setTimeout(() => {
-                heart.remove();
-            }, 4000);
-        }
+            // Pulse animation for the heart
+            this.style.animation = 'none';
+            this.offsetHeight; /* trigger reflow */
+            this.style.animation = 'float 2s ease-in-out infinite';
+        });
     </script>
 </body>
 </html>
