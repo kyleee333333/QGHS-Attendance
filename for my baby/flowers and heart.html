@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 1st Monthsary</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffebee;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .container {
+            position: relative;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        h1 {
+            color: #e91e63;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            animation: pulse 1.5s infinite alternate;
+        }
+        
+        .flower {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+        
+        .petal {
+            position: absolute;
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(to bottom, #ff4081, #e91e63);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            transform-origin: center bottom;
+            animation: sway 3s infinite ease-in-out;
+        }
+        
+        .center {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            top: 50px;
+            left: 50px;
+            box-shadow: 0 0 10px #ffeb3b;
+            animation: glow 2s infinite alternate;
+            z-index: 2;
+        }
+        
+        .stem {
+            position: absolute;
+            width: 10px;
+            height: 150px;
+            background: linear-gradient(to bottom, #4caf50, #2e7d32);
+            top: 150px;
+            left: 70px;
+            z-index: -1;
+        }
+        
+        .leaf {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            background: #4caf50;
+            border-radius: 50% 50% 0 50%;
+            top: 180px;
+            left: 80px;
+            transform: rotate(30deg);
+            z-index: -1;
+        }
+        
+        .heart {
+            position: absolute;
+            color: #e91e63;
+            font-size: 20px;
+            animation: float 6s infinite ease-in-out;
+            opacity: 0;
+            text-shadow: 0 0 5px rgba(255, 64, 129, 0.7);
+        }
+        
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #ffeb3b; }
+            100% { box-shadow: 0 0 20px #ffeb3b; }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Happy 1st Monthsary!</h1>
+        <div class="flower">
+            <div class="center"></div>
+            <div class="stem"></div>
+            <div class="leaf"></div>
+            <!-- Petals will be added by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Create flower petals
+        const flower = document.querySelector('.flower');
+        const petalCount = 8;
+        
+        for (let i = 0; i < petalCount; i++) {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            const angle = (360 / petalCount) * i;
+            petal.style.transform = `rotate(${angle}deg) translateY(-20px)`;
+            petal.style.animationDelay = `${i * 0.2}s`;
+            flower.insertBefore(petal, flower.firstChild);
+        }
+        
+        // Create floating hearts
+        setInterval(() => {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '❤';
+            heart.style.left = `${Math.random() * 100}vw`;
+            heart.style.bottom = '0px';
+            heart.style.animationDuration = `${4 + Math.random() * 6}s`;
+            heart.style.animationDelay = `${Math.random() * 2}s`;
+            document.body.appendChild(heart);
+            
+            // Remove heart after animation completes
+            setTimeout(() => {
+                heart.remove();
+            }, 10000);
+        }, 300);
+    </script>
+</body>

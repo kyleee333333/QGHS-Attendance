@@ -3,228 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy 1st Monthsary!</title>
+    <title>Our 1st Monthsary</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
             background-color: #ffebee;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-            overflow: hidden;
         }
         
         .container {
             text-align: center;
-            position: relative;
+            z-index: 10;
         }
         
         h1 {
-            color: #e91e63;
+            color: #d81b60;
             margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
             transition: all 0.5s ease;
         }
         
         .heart {
-            width: 100px;
-            height: 90px;
-            position: relative;
-            margin: 0 auto;
+            font-size: 100px;
+            color: #e91e63;
             cursor: pointer;
-            animation: float 2s ease-in-out infinite;
+            animation: pulse 1.5s infinite;
+            margin: 20px 0;
+            user-select: none;
         }
         
-        .heart:before, .heart:after {
-            content: "";
-            position: absolute;
-            top: 0;
-            width: 50px;
-            height: 80px;
-            background: #e91e63;
-            border-radius: 50px 50px 0 0;
-            box-shadow: 0 0 20px rgba(233, 30, 99, 0.6);
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
-        .heart:before {
-            left: 50px;
-            transform: rotate(-45deg);
-            transform-origin: 0 100%;
-        }
-        
-        .heart:after {
-            left: 0;
-            transform: rotate(45deg);
-            transform-origin: 100% 100%;
-        }
-        
-        .heart:hover {
-            transform: scale(1.1);
-        }
-        
-        .heart:active {
-            transform: scale(0.9);
-        }
-        
-        .message {
+        .message-box {
             display: none;
             background-color: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-top: 30px;
-            max-width: 400px;
-            position: relative;
-            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            margin: 20px auto;
+            z-index: 100;
         }
         
-        .message h2 {
+        .message-box h2 {
             color: #e91e63;
             margin-top: 0;
         }
         
-        .message p {
+        .message-box p {
             color: #555;
             line-height: 1.6;
         }
         
-        .hearts {
+        .next-btn {
+            display: none;
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);
+            z-index: 10;
+        }
+        
+        .next-btn:hover {
+            background-color: #c2185b;
+            transform: translateY(-2px);
+        }
+        
+        .flower, .heart-particle {
             position: absolute;
-            width: 100%;
-            height: 100%;
             pointer-events: none;
-            z-index: -1;
-        }
-        
-        .heart-particle {
-            position: absolute;
-            font-size: 20px;
-            color: #e91e63;
-            opacity: 0;
-            animation: float-up 4s linear infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-15px);
-            }
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes float-up {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-        
-        .flowers {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+            z-index: 1;
         }
         
         .flower {
-            position: absolute;
-            font-size: 24px;
-            opacity: 0.6;
-            animation: sway 3s ease-in-out infinite;
+            font-size: 20px;
+            color: #e91e63;
+            opacity: 0;
         }
         
-        @keyframes sway {
-            0%, 100% {
-                transform: rotate(-5deg);
-            }
-            50% {
-                transform: rotate(5deg);
-            }
+        .heart-particle {
+            font-size: 20px;
+            color: #e91e63;
+            opacity: 0;
+        }
+        
+        /* Second page styles */
+        .photo-gallery {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 235, 238, 0.9);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .photo {
+            position: absolute;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 1s ease;
+            max-width: 300px;
+            max-height: 300px;
+            object-fit: cover;
+        }
+        
+        .back-btn {
+            position: fixed;
+            bottom: 20px;
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
 <body>
-    <div class="hearts" id="hearts"></div>
-    <div class="flowers" id="flowers"></div>
-    
     <div class="container">
-        <h1 id="title">Click the Heart ❤️</h1>
+        <h1 id="title">Click the Heart</h1>
+        <div class="heart" id="heart">❤️</div>
         
-        <div class="heart" id="heart"></div>
-        
-        <div class="message" id="message">
-            <h2>I Love You So Much Baby!</h2>
-            <p>Happy 1st monthsary, my love! These past 30 days with you have been the most wonderful days of my life. Every moment with you feels like a beautiful dream that I never want to wake up from.</p>
-            <p>You've brought so much happiness into my life in such a short time. I can't wait to celebrate many more monthsaries with you, watching our love grow stronger each day. You mean everything to me, and I cherish you more than words can express.</p>
+        <div class="message-box" id="messageBox">
+            <h2>I love you so much</h2>
+            <p>Every moment with you feels like a beautiful dream I never want to wake up from. Your smile brightens my darkest days, and your love fills my heart with endless joy. I'm so grateful to have you in my life.</p>
+            <p>As we celebrate our first monthsary, I want you to know that my love for you grows stronger with each passing day. You're the most amazing person I've ever known, and I can't wait to create many more beautiful memories with you.</p>
         </div>
+        
+        <button class="next-btn" id="nextBtn">Next ➔</button>
     </div>
-
+    
+    <div class="photo-gallery" id="photoGallery">
+        <button class="back-btn" id="backBtn">Back</button>
+    </div>
+    
     <script>
         const heart = document.getElementById('heart');
-        const message = document.getElementById('message');
         const title = document.getElementById('title');
-        const heartsContainer = document.getElementById('hearts');
-        const flowersContainer = document.getElementById('flowers');
+        const messageBox = document.getElementById('messageBox');
+        const nextBtn = document.getElementById('nextBtn');
+        const photoGallery = document.getElementById('photoGallery');
+        const backBtn = document.getElementById('backBtn');
         
-        // Create random flowers around the page
-        const flowerEmojis = ['🌸', '🌹', '🌺', '🌻', '🌼', '🏵️', '🌷'];
-        for (let i = 0; i < 20; i++) {
-            const flower = document.createElement('div');
-            flower.className = 'flower';
-            flower.innerHTML = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
-            flower.style.left = `${Math.random() * 100}vw`;
-            flower.style.top = `${Math.random() * 100}vh`;
-            flower.style.animationDelay = `${Math.random() * 3}s`;
-            flowersContainer.appendChild(flower);
-        }
+        // Sample photo URLs - replace with your actual photos
+        const photos = [
+            'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
+        ];
         
         heart.addEventListener('click', function() {
-            // Show message
-            message.style.display = 'block';
-            title.innerHTML = 'Happy 1st Monthsary Baby!!!';
+            // Change title
+            title.textContent = "Happy 1st Monthsary Baby!!!";
             
-            // Create heart particles
-            for (let i = 0; i < 30; i++) {
-                setTimeout(() => {
-                    const heartParticle = document.createElement('div');
-                    heartParticle.className = 'heart-particle';
-                    heartParticle.innerHTML = '❤️';
-                    heartParticle.style.left = `${50 + (Math.random() - 0.5) * 100}px`;
-                    heartParticle.style.animationDuration = `${2 + Math.random() * 3}s`;
-                    heartsContainer.appendChild(heartParticle);
-                    
-                    // Remove heart after animation
-                    setTimeout(() => {
-                        heartParticle.remove();
-                    }, 4000);
-                }, i * 100);
+            // Show message box
+            messageBox.style.display = 'block';
+            
+            // Show next button
+            nextBtn.style.display = 'inline-block';
+            
+            // Create floating hearts and flowers
+            for (let i = 0; i < 50; i++) {
+                createFloatingHeart();
+                createFloatingFlower();
             }
-            
-            // Pulse animation for the heart
-            this.style.animation = 'none';
-            this.offsetHeight; /* trigger reflow */
-            this.style.animation = 'float 2s ease-in-out infinite';
         });
+        
+        nextBtn.addEventListener('click', function() {
+            // Hide main container
+            document.querySelector('.container').style.display = 'none';
+            
+            // Show photo gallery
+            photoGallery.style.display = 'flex';
+            
+            // Display photos with animation
+            displayPhotos();
+        });
+        
+        backBtn.addEventListener('click', function() {
+            // Show main container
+            document.querySelector('.container').style.display = 'block';
+            
+            // Hide photo gallery
+            photoGallery.style.display = 'none';
+            
+            // Clear photos
+            while (photoGallery.children.length > 1) {
+                photoGallery.removeChild(photoGallery.lastChild);
+            }
+        });
+        
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.className = 'heart-particle';
+            heart.style.left = Math.random() * window.innerWidth + 'px';
+            heart.style.top = window.innerHeight + 'px';
+            document.body.appendChild(heart);
+            
+            // Animate heart
+            const duration = Math.random() * 3 + 2;
+            const delay = Math.random() * 2;
+            
+            setTimeout(() => {
+                heart.style.opacity = '1';
+                heart.style.transition = `all ${duration}s linear`;
+                heart.style.top = '-50px';
+                heart.style.left = (parseFloat(heart.style.left) + (Math.random() * 200 - 100)) + 'px';
+                
+                // Remove heart after animation
+                setTimeout(() => {
+                    heart.remove();
+                }, duration * 1000);
+            }, delay * 1000);
+        }
+        
+        function createFloatingFlower() {
+            const flower = document.createElement('div');
+            flower.innerHTML = '🌸';
+            flower.className = 'flower';
+            flower.style.left = Math.random() * window.innerWidth + 'px';
+            flower.style.top = window.innerHeight + 'px';
+            document.body.appendChild(flower);
+            
+            // Animate flower
+            const duration = Math.random() * 4 + 3;
+            const delay = Math.random() * 2;
+            
+            setTimeout(() => {
+                flower.style.opacity = '1';
+                flower.style.transition = `all ${duration}s linear`;
+                flower.style.top = '-50px';
+                flower.style.left = (parseFloat(flower.style.left) + (Math.random() * 200 - 100)) + 'px';
+                
+                // Remove flower after animation
+                setTimeout(() => {
+                    flower.remove();
+                }, duration * 1000);
+            }, delay * 1000);
+        }
+        
+        function displayPhotos() {
+            photos.forEach((photoUrl, index) => {
+                const img = document.createElement('img');
+                img.src = photoUrl;
+                img.className = 'photo';
+                
+                // Position randomly within the visible area
+                img.style.left = (Math.random() * 60 + 10) + '%';
+                img.style.top = (Math.random() * 60 + 10) + '%';
+                
+                photoGallery.appendChild(img);
+                
+                // Show photo with delay
+                setTimeout(() => {
+                    img.style.opacity = '1';
+                    img.style.transform = 'scale(1) rotate(' + (Math.random() * 20 - 10) + 'deg)';
+                }, index * 600);
+            });
+        }
     </script>
 </body>
 </html>

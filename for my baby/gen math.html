@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Bioterra — Biology Grade 11 Adventure</title>
+  <style>
+    body{margin:0;font-family:Arial, sans-serif;background:#0f1724;color:#f0f0f0}
+    header{padding:12px;background:#1e293b;text-align:center}
+    header h1{margin:0;color:#38bdf8}
+    main{display:grid;grid-template-columns:260px 1fr;min-height:90vh}
+    aside{background:#1e293b;padding:12px}
+    aside h2{font-size:16px;margin-top:0}
+    .realm{padding:10px;background:#334155;margin:6px 0;border-radius:6px;cursor:pointer}
+    .realm.locked{opacity:.5;pointer-events:none}
+    .card{padding:16px}
+    .question{font-size:18px;margin-bottom:8px}
+    input{padding:6px;width:60%;border-radius:4px;border:1px solid #475569;background:#0f1724;color:#f0f0f0}
+    button{padding:6px 12px;margin:6px;background:#38bdf8;border:none;border-radius:4px;cursor:pointer}
+    .feedback{margin-top:8px;font-weight:bold}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌱 Bioterra — Biology Grade 11 Quest</h1>
+    <div>Level up by answering biology questions!</div>
+  </header>
+  <main>
+    <aside>
+      <h2>Realms</h2>
+      <div class="realm" data-realm="cells">🔬 Cellular Realm</div>
+      <div class="realm locked" data-realm="molecules">⚛ Molecular Realm</div>
+      <div class="realm locked" data-realm="genetics">🧬 Genetic Realm</div>
+      <div class="realm locked" data-realm="anatomy">🫀 Anatomy Realm</div>
+      <div class="realm locked" data-realm="ecology">🌍 Ecology Realm</div>
+      <div class="realm locked" data-realm="evolution">🐒 Evolution Realm</div>
+    </aside>
+    <section class="card">
+      <h2 id="realmTitle">Welcome, Scholar!</h2>
+      <p id="questText">Select a realm to begin your biology adventure.</p>
+      <div id="gameArea" style="display:none">
+        <div class="question" id="questionText"></div>
+        <input id="answerInput" placeholder="Type your answer"/>
+        <button id="submitBtn">Submit</button>
+        <div class="feedback" id="feedback"></div>
+        <div id="progress"></div>
+      </div>
+    </section>
+  </main>
+
+<script>
+const realms = {
+  cells: {
+    title:"Cellular Realm",
+    boss:"Cell Guardian",
+    questions:[
+      {q:"What is the powerhouse of the cell?",a:"mitochondria"},
+      {q:"Which organelle contains chlorophyll?",a:"chloroplast"},
+      {q:"What controls all cell activities?",a:"nucleus"},
+      {q:"What is the basic unit of life?",a:"cell"}
+    ]
+  },
+  molecules:{
+    title:"Molecular Realm",
+    boss:"Enzyme Lord",
+    questions:[
+      {q:"Which biomolecule is the main source of energy?",a:"carbohydrate"},
+      {q:"What are the building blocks of proteins?",a:"amino acids"},
+      {q:"Which molecule carries genetic information?",a:"dna"},
+      {q:"What gas is needed for cellular respiration?",a:"oxygen"}
+    ]
+  },
+  genetics:{
+    title:"Genetic Realm",
+    boss:"Gene Warden",
+    questions:[
+      {q:"What is the basic unit of heredity?",a:"gene"},
+      {q:"What process produces gametes?",a:"meiosis"},
+      {q:"What process copies body cells?",a:"mitosis"},
+      {q:"What base pairs with adenine in DNA?",a:"thymine"}
+    ]
+  },
+  anatomy:{
+    title:"Anatomy Realm",
+    boss:"Body Guardian",
+    questions:[
+      {q:"Which organ pumps blood through the body?",a:"heart"},
+      {q:"Where does gas exchange occur in the lungs?",a:"alveoli"},
+      {q:"Which system controls voluntary movement?",a:"nervous system"},
+      {q:"Which organ filters blood in the excretory system?",a:"kidney"}
+    ]
+  },
+  ecology:{
+    title:"Ecology Realm",
+    boss:"Eco Spirit",
+    questions:[
+      {q:"What is a group of organisms of the same species in one area called?",a:"population"},
+      {q:"What is the first trophic level in a food chain?",a:"producer"},
+      {q:"Which biome is characterized by very little rainfall?",a:"desert"},
+      {q:"What gas do plants release during photosynthesis?",a:"oxygen"}
+    ]
+  },
+  evolution:{
+    title:"Evolution Realm",
+    boss:"Ancestor Shade",
+    questions:[
+      {q:"Who proposed the theory of natural selection?",a:"darwin"},
+      {q:"What is the change in species over time called?",a:"evolution"},
+      {q:"What do we call structures with similar form but different function?",a:"homologous"},
+      {q:"What term describes different species evolving similar traits?",a:"convergent evolution"}
+    ]
+  }
+}
+
+let currentRealm=null, qIndex=0, score=0;
+
+document.querySelectorAll('.realm').forEach(el=>{
+  el.addEventListener('click',()=>{
+    if(el.classList.contains('locked')) return;
+    const id=el.dataset.realm;
+    currentRealm=id; qIndex=0; score=0;
+    document.getElementById('realmTitle').textContent=realms[id].title;
+    document.getElementById('questText').textContent=`Defeat ${realms[id].boss} by answering questions!`;
+    document.getElementById('gameArea').style.display='block';
+    showQuestion();
+  });
+});
+
+function showQuestion(){
+  const realm=realms[currentRealm];
+  if(qIndex>=realm.questions.length){
+    document.getElementById('questionText').textContent="🎉 You defeated "+realm.boss+"!";
+    document.getElementById('progress').textContent=`Score: ${score}/${realm.questions.length}`;
+    unlockNextRealm();
+    return;
+  }
+  document.getElementById('questionText').textContent=realm.questions[qIndex].q;
+  document.getElementById('answerInput').value='';
+  document.getElementById('feedback').textContent='';
+}
+
+document.getElementById('submitBtn').addEventListener('click',()=>{
+  const ans=document.getElementById('answerInput').value.trim().toLowerCase();
+  const correct=realms[currentRealm].questions[qIndex].a;
+  if(ans===correct){
+    document.getElementById('feedback').textContent="✅ Correct!";
+    score++;
+  }else{
+    document.getElementById('feedback').textContent="❌ Wrong. Correct answer: "+correct;
+  }
+  qIndex++;
+  setTimeout(showQuestion,1000);
+});
+
+function unlockNextRealm(){
+  const realmEls=document.querySelectorAll('.realm');
+  for(let i=0;i<realmEls.length;i++){
+    if(realmEls[i].dataset.realm===currentRealm && i+1<realmEls.length){
+      realmEls[i+1].classList.remove('locked');
+    }
+  }
+}
+</script>
+</body>
+</html>
