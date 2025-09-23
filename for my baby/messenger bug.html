@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Messenger Send Simulator — Safe</title>
+<style>
+  body{font-family:Inter,system-ui,Arial;background:#f3f4f6;color:#0f1724;padding:18px}
+  .wrap{max-width:820px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  h1{font-size:18px;margin:0}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  input[type=text], input[type=number]{padding:8px;border:1px solid #cbd5e1;border-radius:8px}
+  button{padding:8px 12px;border-radius:8px;border:0;background:#2563eb;color:white;cursor:pointer}
+  button.warn{background:#ef4444}
+  .chat{border:1px solid #e2e8f0;background:white;border-radius:10px;height:420px;overflow:auto;padding:12px;margin-top:12px}
+  .bubble{display:inline-block;padding:10px 12px;border-radius:14px;margin:6px 0;max-width:78%;}
+  .you{background:#dcfce7;align-self:flex-end}
+  .other{background:#e2e8f0}
+  .status{font-size:13px;color:#475569;margin-top:8px}
+  .warning{background:#fff7ed;border:1px solid #f59e0b;padding:10px;border-radius:8px;margin-top:12px}
+  label{font-size:13px;color:#475569}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Messenger Send Simulator — Safe Demo</h1>
+      <div style="font-size:13px;color:#475569">Simulation only — does NOT contact Messenger</div>
+    </header>
+
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <label>Message to send</label><br>
+        <input id="msg" type="text" value="Hello — this is a test." />
+      </div>
+
+      <div style="width:160px">
+        <label>Times</label><br>
+        <input id="count" type="number" min="1" max="100000" value="1000" />
+      </div>
+
+      <div style="width:160px">
+        <label>Delay (ms)</label><br>
+        <input id="delay" type="number" min="0" max="60000" value="50" />
+      </div>
+
+      <div class="controls">
+        <button id="start">Start Simulation</button>
+        <button id="stop" class="warn" disabled>Stop</button>
+        <button id="clear">Clear Chat</button>
+      </div>
+    </div>
+
+    <div class="warning">
+      <strong>Important:</strong> This tool is a <em>local simulator</em> only. It will not send messages to Facebook Messenger or any external service.
+      If you want to message real users at scale, use official APIs and obtain explicit consent. I can help with lawful, compliant approaches.
+    </div>
+
+    <div class="chat" id="chat" aria-live="polite"></div>
+
+    <div class="status" id="status">Ready.</div>
+  </div>
+
+<script>
+  // Simulator: appends bubbles to the local chat view to simulate repeated sends.
+  const chat = document.getElementById('chat');
+  const msgInput = document.getElementById('msg');
+  const countInput = document.getElementById('count');
+  const delayInput = document.getElementById('delay');
+  const startBtn = document.getElementById('start');
+  const stopBtn = document.getElementById('stop');
+  const clearBtn = document.getElementById('clear');
+  const status = document.getElementById('status');
+
+  let running = false;
+  let sent = 0;
+  let target = 0;
+  let timerId = null;
+
+  function appendBubble(text){
+    const el = document.createElement('div');
+    el.className = 'bubble you';
+    el.textContent = text;
+    el.style.display = 'block';
+    el.style.marginLeft = 'auto';
+    chat.appendChild(el);
+    // auto-scroll
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function updateStatus(){
+    status.textContent = `Sent ${sent} / ${target} simulated messages.` + (running ? ' (Running)' : ' (Stopped)');
+  }
+
+  function runSimulation(){
+    if(running) return;
+    const text = msgInput.value || '';
+    target = Math.max(1, Math.min(100000, Number(countInput.value) || 1));
+    let delay = Math.max(0, Number(delayInput.value) || 0);
+    // Safety: if target is huge and delay is very small, show a confirmation
+    if(target > 5000 && delay < 5){
+      if(!confirm('You are about to simulate a very large run ('+target+' sends) with very small delay. Continue?')) return;
+    }
+
+    sent = 0; running = true;
+    startBtn.disabled = true; stopBtn.disabled = false;
+    updateStatus();
+
+    // use recursive setTimeout to allow stopping cleanly
+    function step(){
+      if(!running || sent >= target){ finish(); return; }
+      // append one simulated "send"
+      appendBubble((sent+1) + ". " + text);
+      sent++;
+      if(sent % 50 === 0){
+        // let UI breathe
+        updateStatus();
+      }
+      timerId = setTimeout(step, delay);
+    }
+    step();
+  }
+
+  function finish(){
+    running = false;
+    startBtn.disabled = false; stopBtn.disabled = true;
+    clearTimeout(timerId);
+    updateStatus();
+    status.textContent = `Completed simulation: ${sent} messages appended.`;
+  }
+
+  startBtn.addEventListener('click', runSimulation);
+  stopBtn.addEventListener('click', ()=>{ running=false; });
+  clearBtn.addEventListener('click', ()=>{
+    chat.innerHTML = '';
+    sent = 0; target = 0; updateStatus();
+    status.textContent = 'Chat cleared.';
+  });
+
+  // accessibility: enter to start when focus in msg input
+  msgInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ runSimulation(); }});
+</script>
+</body>
+</html>

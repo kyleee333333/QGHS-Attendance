@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chemical Reactions — Redox (Animated)</title>
+<style>
+  :root{
+    --bg:#0b1220; --accent:#06b6d4; --muted:#9fb0c8;
+    --text:#e6f0f6; --accent2:#7c3aed;
+  }
+  body{margin:0;font-family:Inter,system-ui,Arial;background:#071028;color:var(--text)}
+  .container{max-width:1100px;margin:28px auto;padding:18px}
+  .slide{display:none;opacity:0;transform:scale(0.95);transition:all .6s ease}
+  .slide.active{display:block;opacity:1;transform:scale(1)}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  header h1{margin:0;font-size:20px}
+  .controls{display:flex;gap:8px}
+  button{background:var(--accent);color:#022;border:0;padding:10px 12px;border-radius:8px;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text)}
+  h2{margin-top:0;color:var(--accent2);opacity:0;transform:translateY(-20px);transition:all .8s ease}
+  .slide.active h2{opacity:1;transform:translateY(0)}
+  p, ul, ol, .eq, .note{opacity:0;transform:translateY(20px);transition:all .6s ease}
+  .reveal{opacity:1 !important;transform:translateY(0) !important}
+  ul, ol{line-height:1.5}
+  .eq{background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;margin:8px 0;font-family:monospace}
+  .note{margin-top:8px;background:rgba(255,255,255,0.03);padding:8px;border-left:4px solid var(--accent2);border-radius:6px;font-size:14px}
+  .presenter{display:none;margin-top:12px;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px}
+  .presenter.visible{display:block}
+  .progress{margin-top:8px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Chemical Reactions — Redox</h1>
+    <div class="controls">
+      <button id="prev" class="ghost">◀ Prev</button>
+      <button id="next">Next ▶</button>
+      <button id="toggleNotes" class="ghost">Show Notes</button>
+    </div>
+  </header>
+
+  <!-- Slide 1 -->
+  <section class="slide active" data-index="0">
+    <h2>What is a Redox Reaction?</h2>
+    <p>A <b>redox reaction</b> involves transfer of electrons. One species is oxidized (loses e⁻), another reduced (gains e⁻).</p>
+    <ul>
+      <li>Oxidation = loss of electrons</li>
+      <li>Reduction = gain of electrons</li>
+      <li>Both always occur together</li>
+      <li>Examples: rusting, batteries, respiration</li>
+    </ul>
+    <div class="eq">Na + Cl₂ → Na⁺ + Cl⁻</div>
+    <div class="progress">Slide 1 / 5</div>
+    <div class="presenter">Notes: Start with everyday examples like rust or batteries.</div>
+  </section>
+
+  <!-- Slide 2 -->
+  <section class="slide" data-index="1">
+    <h2>Oxidation Numbers</h2>
+    <p>Oxidation numbers are bookkeeping charges for tracking electrons.</p>
+    <ul>
+      <li>Elements: 0</li>
+      <li>Monatomic ions = charge</li>
+      <li>O usually −2, H usually +1</li>
+      <li>Sum = charge of compound/ion</li>
+    </ul>
+    <div class="eq">2 Na + Cl₂ → 2 NaCl<br>Na: 0 → +1 (oxidized)<br>Cl: 0 → −1 (reduced)</div>
+    <div class="progress">Slide 2 / 5</div>
+    <div class="presenter">Notes: Practice with non-redox vs redox examples.</div>
+  </section>
+
+  <!-- Slide 3 -->
+  <section class="slide" data-index="2">
+    <h2>Balancing Redox with Half-Reactions</h2>
+    <ol>
+      <li>Write oxidation & reduction halves</li>
+      <li>Balance atoms except H, O</li>
+      <li>Balance O with H₂O, H with H⁺</li>
+      <li>Balance charge with e⁻</li>
+      <li>Multiply to equalize e⁻, then add</li>
+    </ol>
+    <div class="eq">
+      MnO₄⁻ + 8 H⁺ + 5 e⁻ → Mn²⁺ + 4 H₂O<br>
+      Fe²⁺ → Fe³⁺ + e⁻
+    </div>
+    <div class="progress">Slide 3 / 5</div>
+    <div class="presenter">Notes: Work step-by-step, emphasize conservation of mass & charge.</div>
+  </section>
+
+  <!-- Slide 4 -->
+  <section class="slide" data-index="3">
+    <h2>Worked Example</h2>
+    <p>Zinc + Copper(II) ions:</p>
+    <div class="eq">
+      Zn → Zn²⁺ + 2 e⁻ (oxidation)<br>
+      Cu²⁺ + 2 e⁻ → Cu (reduction)<br>
+      Zn + Cu²⁺ → Zn²⁺ + Cu
+    </div>
+    <p>This reaction powers a simple galvanic cell.</p>
+    <div class="progress">Slide 4 / 5</div>
+    <div class="presenter">Notes: Highlight anode vs cathode roles.</div>
+  </section>
+
+  <!-- Slide 5 -->
+  <section class="slide" data-index="4">
+    <h2>Applications & Summary</h2>
+    <ul>
+      <li><b>Batteries</b>: galvanic cells</li>
+      <li><b>Corrosion</b>: rust prevention</li>
+      <li><b>Industrial</b>: electroplating, extraction</li>
+      <li><b>Biology</b>: respiration, photosynthesis</li>
+    </ul>
+    <p><b>Summary:</b> Redox = electron transfer, tracked by oxidation numbers, balanced via half-reactions.</p>
+    <div class="progress">Slide 5 / 5</div>
+    <div class="presenter">Notes: Wrap up with big-picture applications.</div>
+  </section>
+</div>
+
+<script>
+let slides = document.querySelectorAll('.slide');
+let index = 0;
+let notesOn = false;
+
+// Reveal animation: progressively show elements
+function revealContent(slide){
+  const items = slide.querySelectorAll("p, ul, ol, .eq");
+  items.forEach((el,i)=>{
+    el.classList.remove("reveal");
+    setTimeout(()=>{ el.classList.add("reveal"); }, 400 + i*300);
+  });
+}
+
+// Show slide
+function showSlide(i){
+  slides.forEach(s => s.classList.remove('active'));
+  index = Math.max(0, Math.min(slides.length-1,i));
+  let current = slides[index];
+  current.classList.add('active');
+  revealContent(current);
+  // Notes visibility
+  let note = current.querySelector(".presenter");
+  if(note){ note.style.display = notesOn ? "block":"none"; }
+}
+
+document.getElementById('prev').onclick = ()=>showSlide(index-1);
+document.getElementById('next').onclick = ()=>showSlide(index+1);
+document.addEventListener('keydown',e=>{
+  if(e.key==="ArrowRight") showSlide(index+1);
+  if(e.key==="ArrowLeft") showSlide(index-1);
+});
+
+document.getElementById('toggleNotes').onclick = (e)=>{
+  notesOn = !notesOn;
+  e.target.textContent = notesOn ? "Hide Notes":"Show Notes";
+  showSlide(index);
+};
+
+// Initialize
+showSlide(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chemical Reactions — Redox (5-slide presentation)</title>
+<style>
+  :root{
+    --bg:#0b1220; --card:#0f1724; --accent:#06b6d4; --muted:#9fb0c8;
+    --text:#e6f0f6; --accent2:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071028,#071a2a);color:var(--text)}
+  .container{max-width:1100px;margin:28px auto;padding:18px}
+  .slide{display:none;min-height:68vh;padding:36px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+  .slide.active{display:block}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  header h1{margin:0;font-size:20px}
+  header .meta{color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:8px}
+  button{background:var(--accent);color:#022;border:0;padding:10px 12px;border-radius:8px;font-weight:700;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.05);color:var(--text);font-weight:600}
+  .footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+  h2{margin-top:0;color:var(--accent2)}
+  p{line-height:1.5;color:var(--text)}
+  ul{color:var(--text);line-height:1.5}
+  .eq{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;margin:8px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .note{margin-top:12px;background:rgba(255,255,255,0.02);padding:10px;border-left:4px solid rgba(255,255,255,0.03);color:var(--muted);border-radius:6px}
+  .small{font-size:13px;color:var(--muted)}
+  .progress{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .pager{font-weight:700}
+  .presenter{display:none;margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,0,0,0.2);color:var(--muted)}
+  .presenter.visible{display:block}
+  .toggle{background:transparent;border:1px solid rgba(255,255,255,0.05);padding:6px 8px;border-radius:6px;color:var(--muted);cursor:pointer}
+  .qa{margin-top:12px;background:rgba(255,255,255,0.02);padding:12px;border-radius:8px}
+  /* Responsive */
+  @media(max-width:820px){ .two-col{grid-template-columns:1fr} .container{padding:10px} }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Chemical Reactions — Redox</h1>
+        <div class="meta">5-slide overview · definitions, balancing, examples, applications</div>
+      </div>
+      <div class="controls">
+        <button id="prev" class="ghost">◀ Prev</button>
+        <button id="next">Next ▶</button>
+        <button id="toggleNotes" class="toggle">Show Presenter Notes</button>
+      </div>
+    </header>
+
+    <!-- Slide 1: Introduction -->
+    <section class="slide active" data-index="1" id="slide1">
+      <h2>Slide 1 — What is a Redox Reaction?</h2>
+      <p>
+        A <strong>redox reaction</strong> (reduction–oxidation reaction) is a chemical reaction
+        in which electrons are transferred between species. One reactant <em>loses</em> electrons
+        (is <strong>oxidized</strong>) and another <em>gains</em> electrons (is <strong>reduced</strong>).
+      </p>
+
+      <div class="two-col">
+        <div>
+          <h3>Key ideas</h3>
+          <ul>
+            <li><strong>Oxidation</strong> = loss of electrons → increase in oxidation state.</li>
+            <li><strong>Reduction</strong> = gain of electrons → decrease in oxidation state.</li>
+            <li>Redox always involves both processes simultaneously: when one species is oxidized, another is reduced.</li>
+            <li>Many important processes are redox: corrosion, metabolism, combustion, electrochemistry.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Symbols & notation</h3>
+          <p class="small">Electron transfer shown as e<sup>-</sup> in half-reactions. Oxidation numbers (states) help track electron movement.</p>
+          <div class="eq"><strong>Generic form (overall):</strong><br>
+            A + B → Aⁿ⁺ + Bᵐ⁻ (illustrative — shows one species oxidized, the other reduced)
+          </div>
+          <div class="note"><strong>Tip:</strong> If a species loses electrons, add electrons on the product side of its half-reaction; if it gains electrons, add electrons to the reactant side.</div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="pager">Slide 1 / 5</div>
+        <div class="small">Use ← and → or the buttons to navigate</div>
+      </div>
+
+      <div class="presenter" id="notes1">
+        <strong>Presenter notes:</strong> Start with intuitive examples: rust (iron → iron oxide), battery discharge. Emphasize that electron bookkeeping is the core — oxidation numbers are a bookkeeping tool.
+      </div>
+    </section>
+
+    <!-- Slide 2: Oxidation Numbers & Identifying Redox -->
+    <section class="slide" data-index="2" id="slide2">
+      <h2>Slide 2 — Oxidation Numbers & How to Identify Redox</h2>
+      <p>
+        <strong>Oxidation number (state)</strong> is a formal charge assignment used to track electrons in compounds.
+        Rules (brief):
+      </p>
+      <ul>
+        <li>Element in elemental form: oxidation state = 0 (e.g., O<sub>2</sub>, Fe).</li>
+        <li>Monatomic ion: equals its charge (Na<sup>+</sup> = +1, Cl<sup>-</sup> = -1).</li>
+        <li>Oxygen usually −2 (except in peroxides where it is −1); hydrogen is usually +1 (except in metal hydrides).</li>
+        <li>Sum of oxidation numbers in a neutral compound = 0; in a polyatomic ion = ion charge.</li>
+      </ul>
+
+      <h3>Identify redox</h3>
+      <p>Compare oxidation numbers of each element in reactants and products. If any element's oxidation number changes, the reaction is a redox reaction.</p>
+
+      <div class="eq"><strong>Example:</strong> 2 Na + Cl<sub>2</sub> → 2 NaCl<br>
+        Na: 0 → +1 (oxidized) ; Cl: 0 → −1 (reduced)</div>
+
+      <div class="presenter" id="notes2">
+        <strong>Presenter notes:</strong> Walk students through the rules with examples. Emphasize the usefulness for complex molecules and ionic reactions. Show a non-redox example, e.g., double displacement without electron-transfer, to contrast.
+      </div>
+
+      <div class="progress"><div class="pager">Slide 2 / 5</div><div class="small"></div></div>
+    </section>
+
+    <!-- Slide 3: Half-Reactions & Balancing Redox -->
+    <section class="slide" data-index="3" id="slide3">
+      <h2>Slide 3 — Half-Reactions & Balancing Redox Equations</h2>
+
+      <p>
+        A convenient method for balancing redox equations is the <strong>half-reaction method</strong>.
+        Steps (acidic solutions):
+      </p>
+      <ol>
+        <li>Write oxidation and reduction half-reactions separately.</li>
+        <li>Balance atoms other than H and O.</li>
+        <li>Balance O by adding H<sub>2</sub>O and H by adding H<sup>+</sup>.</li>
+        <li>Balance charge by adding electrons (e<sup>-</sup>).</li>
+        <li>Multiply half-reactions so electron counts match, then add and cancel electrons.</li>
+      </ol>
+
+      <h3>Example (acidic): Permanganate + Iron(II)</h3>
+      <div class="eq">
+        Unbalanced: MnO<sub>4</sub><sup>-</sup> + Fe<sup>2+</sup> → Mn<sup>2+</sup> + Fe<sup>3+</sup>
+      </div>
+
+      <div>
+        <strong>Half-reactions:</strong>
+        <div class="eq">Reduction: MnO<sub>4</sub><sup>-</sup> + 8 H<sup>+</sup> + 5 e<sup>-</sup> → Mn<sup>2+</sup> + 4 H<sub>2</sub>O</div>
+        <div class="eq">Oxidation: Fe<sup>2+</sup> → Fe<sup>3+</sup> + e<sup>-</sup></div>
+        Multiply oxidation half by 5 to match electrons:
+        <div class="eq">5 Fe<sup>2+</sup> → 5 Fe<sup>3+</sup> + 5 e<sup>-</sup></div>
+        Add them and cancel electrons:
+        <div class="eq">MnO<sub>4</sub><sup>-</sup> + 8 H<sup>+</sup> + 5 Fe<sup>2+</sup> → Mn<sup>2+</sup> + 4 H<sub>2</sub>O + 5 Fe<sup>3+</sup></div>
+      </div>
+
+      <div class="note">For basic solutions, add OH<sup>-</sup> to neutralize H<sup>+</sup> (convert to H<sub>2</sub>O), then simplify.</div>
+
+      <div class="presenter" id="notes3">
+        <strong>Presenter notes:</strong> Work this example step-by-step with students. Explain why we add H<sup>+</sup>/H<sub>2</sub>O and how electron cancellation ensures charge conservation.
+      </div>
+
+      <div class="progress"><div class="pager">Slide 3 / 5</div><div class="small"></div></div>
+    </section>
+
+    <!-- Slide 4: Worked Examples -->
+    <section class="slide" data-index="4" id="slide4">
+      <h2>Slide 4 — Simple Worked Examples</h2>
+
+      <h3>Example A — Zinc and Copper(II)</h3>
+      <p>Reaction: Zn + Cu<sup>2+</sup> → Zn<sup>2+</sup> + Cu</p>
+      <div class="eq">
+        Oxidation half: Zn → Zn<sup>2+</sup> + 2 e<sup>-</sup><br>
+        Reduction half: Cu<sup>2+</sup> + 2 e<sup>-</sup> → Cu<br>
+        Combined: Zn + Cu<sup>2+</sup> → Zn<sup>2+</sup> + Cu
+      </div>
+      <p class="small">This is the basis of a simple galvanic cell: Zn oxidizes (anode), Cu<sup>2+</sup> reduces (cathode).</p>
+
+      <h3 style="margin-top:10px">Example B — Balancing by Inspection (quick method)</h3>
+      <p>Some redox equations can be balanced by inspection when electron transfer is obvious. Always check mass and charge balance after finishing.</p>
+
+      <div class="qa">
+        <strong>Practice question</strong><br>
+        Balance the following in acidic solution:<br>
+        Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup> + Fe<sup>2+</sup> → Cr<sup>3+</sup> + Fe<sup>3+</sup>
+        <div style="margin-top:8px">
+          <button id="showAnswer">Show Answer</button>
+          <div id="answerArea" class="small" style="margin-top:8px;display:none">
+            Balanced: Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup> + 14 H<sup>+</sup> + 6 Fe<sup>2+</sup> → 2 Cr<sup>3+</sup> + 6 Fe<sup>3+</sup> + 7 H<sub>2</sub>O
+          </div>
+        </div>
+      </div>
+
+      <div class="presenter" id="notes4">
+        <strong>Presenter notes:</strong> Emphasize common electron numbers for transition metal changes (e.g., Fe2+ → Fe3+ is 1 e-, MnO4- → Mn2+ is 5 e-). Encourage students to practice half-reaction pairing.
+      </div>
+
+      <div class="progress"><div class="pager">Slide 4 / 5</div><div class="small"></div></div>
+    </section>
+
+    <!-- Slide 5: Applications, Summary, & Quick Quiz -->
+    <section class="slide" data-index="5" id="slide5">
+      <h2>Slide 5 — Applications, Summary & Quick Quiz</h2>
+
+      <h3>Real-world applications</h3>
+      <ul>
+        <li><strong>Batteries:</strong> Galvanic cells generate electricity by spontaneous redox (e.g., alkaline, lead–acid, lithium batteries).</li>
+        <li><strong>Corrosion:</strong> Rusting of iron is a redox process (Fe → Fe<sup>2+</sup>/Fe<sup>3+</sup>), often prevented by sacrificial anodes.</li>
+        <li><strong>Industrial redox:</strong> Processes like metal extraction and electroplating rely on controlled redox reactions.</li>
+        <li><strong>Biological redox:</strong> Cellular respiration and photosynthesis are sequences of redox steps that transfer electrons to produce ATP or reduce CO<sub>2</sub>.</li>
+      </ul>
+
+      <h3>Quick summary</h3>
+      <ul>
+        <li>Redox = electron transfer (oxidation = loss, reduction = gain).</li>
+        <li>Oxidation numbers help identify changes and track electrons.</li>
+        <li>Half-reaction method balances atoms, charge, and electrons — works in acidic and basic media.</li>
+        <li>Redox principles are central across chemistry, biology, engineering, and environmental science.</li>
+      </ul>
+
+      <h3>Mini quiz (self-check)</h3>
+      <ol>
+        <li>In the reaction Cu + 2 Ag<sup>+</sup> → Cu<sup>2+</sup> + 2 Ag, which species is oxidized?</li>
+        <li>Balance: S + HNO<sub>3</sub> → SO<sub>2</sub> + NO (acidic) — identify main steps.</li>
+        <li>Why does adding an external circuit allow a galvanic cell to produce current?</li>
+      </ol>
+
+      <div class="note">Answers (brief): 1) Cu is oxidized (Cu → Cu<sup>2+</sup>); 3) The external circuit allows electrons to flow from anode to cathode, creating electrical current while ions move internally to maintain charge balance.</div>
+
+      <div class="presenter" id="notes5">
+        <strong>Presenter notes:</strong> Finish by tying redox back to previous topics (stoichiometry, acids/bases for aqueous balancing) and suggest practice: balance a mix of transition-metal redox reactions in acidic/basic media.
+      </div>
+
+      <div class="progress"><div class="pager">Slide 5 / 5</div><div class="small"></div></div>
+    </section>
+
+    <div class="footer">Press ← → or use the Prev/Next buttons. Toggle presenter notes for extra talking points.</div>
+  </div>
+
+<script>
+  // Slide navigation
+  const slides = Array.from(document.querySelectorAll('.slide'))
+  let index = 0
+  function showSlide(i){
+    slides.forEach(s => s.classList.remove('active'))
+    index = Math.max(0, Math.min(slides.length-1, i))
+    slides[index].classList.add('active')
+    // hide all notes, show for current slide only if presenter visible
+    const presenterVisible = document.getElementById('toggleNotes').classList.contains('on')
+    document.querySelectorAll('.presenter').forEach((pn, idx) => {
+      pn.classList.toggle('visible', presenterVisible && idx === index)
+    })
+    // update buttons disabled states
+    document.getElementById('prev').disabled = (index===0)
+    document.getElementById('next').disabled = (index===slides.length-1)
+  }
+  document.getElementById('prev').addEventListener('click', ()=> showSlide(index-1))
+  document.getElementById('next').addEventListener('click', ()=> showSlide(index+1))
+  document.addEventListener('keydown', (e)=> {
+    if(e.key === 'ArrowRight') showSlide(index+1)
+    if(e.key === 'ArrowLeft') showSlide(index-1)
+  })
+  // toggle notes
+  document.getElementById('toggleNotes').addEventListener('click', (e)=>{
+    e.target.classList.toggle('on')
+    const on = e.target.classList.contains('on')
+    e.target.textContent = on ? 'Hide Presenter Notes' : 'Show Presenter Notes'
+    document.querySelectorAll('.presenter').forEach((pn, idx) => pn.classList.toggle('visible', on && idx===index))
+  })
+
+  // Show answer button on slide 4
+  document.getElementById('showAnswer').addEventListener('click', ()=>{
+    document.getElementById('answerArea').style.display = 'block'
+  })
+
+  // initialize
+  showSlide(0)
+</script>
+</body>
+</html>
