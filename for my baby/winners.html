@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TechQuest 2025 — Full 3-Slot Morph Slideshow</title>
+
+<!--
+  Full Featured Slideshow (400+ lines)
+  - 5 slides
+  - each slide has a center gallery with 3 picture slots
+  - FLIP-style morph animation for slots that share the same data-morph id
+  - autoplay, pause on hover, keyboard nav, click-to-advance
+  - Ken Burns slow zoom on images
+  - Responsive: 3 across desktop, wrap on tablet, stacked on mobile
+  - Replace placeholder src values with your own image filenames or URLs
+-->
+
+<style>
+/* ============================
+   Root variables & base reset
+   ============================ */
+:root{
+  --bg-a: #041028;
+  --bg-b: #071021;
+  --card: rgba(255,255,255,0.03);
+  --accent: #f59e0b;
+  --accent2: #06b6d4;
+  --muted: #9fb6c9;
+  --glass: rgba(255,255,255,0.03);
+  --ease: cubic-bezier(.2,.9,.25,1);
+  --dur: 520ms;
+  --maxWidth: 1120px;
+  --slotGap: 16px;
+  --slotMax: 300px;
+  --kenBurnsScale: 1.06; /* background zoom factor for ken burns */
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:linear-gradient(180deg,var(--bg-a),var(--bg-b));color:#fff;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+
+/* ============================
+   Slides container
+   ============================ */
+.slides {
+  position:relative;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* Each slide covers viewport; content centered in .wrapper */
+.slide {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  opacity:0;
+  transform: translateY(16px) scale(.98);
+  pointer-events:none;
+}
+.slide.active {
+  opacity:1;
+  transform: translateY(0) scale(1);
+  pointer-events:auto;
+  z-index:2;
+}
+
+/* ============================
+   Wrapper (card) - where content sits
+   ============================ */
+.wrapper {
+  position:relative;
+  width: min(var(--maxWidth), 94%);
+  height: min(780px, 86vh);
+  border-radius: 18px;
+  padding: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  box-shadow: 0 22px 64px rgba(2,8,20,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
+}
+
+/* ============================
+   Center gallery (3 slots)
+   ============================ */
+.center-gallery {
+  display:flex;
+  gap: var(--slotGap);
+  justify-content:center;
+  align-items:center;
+  width: 92%;
+  max-width: 900px;
+  flex-wrap: nowrap; /* will wrap via media queries */
+  transition: transform 420ms var(--ease);
+}
+
+.center-gallery .slot {
+  flex: 1;
+  max-width: var(--slotMax);
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #071421, #04121a);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+  transition: transform 420ms var(--ease), box-shadow 420ms var(--ease);
+  position: relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer; /* hint that images are interactive (click to advance) */
+}
+
+/* slight lift on hover of slot (desktop) */
+.slide.active .center-gallery .slot:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 28px 60px rgba(0,0,0,0.55);
+}
+
+/* image fills slot */
+.center-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display:block;
+  user-select:none;
+  -webkit-user-drag: none;
+  transform-origin: center center;
+  transition: transform 9s linear; /* used for Ken Burns slow zoom */
+}
+
+/* add overlay glow when active slide (makes images pop) */
+.slide.active .center-gallery .slot::after{
+  content: '';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  box-shadow: inset 0 0 120px rgba(255,255,255,0.02);
+  pointer-events:none;
+}
+
+/* ============================
+   Surrounding text positions
+   ============================ */
+.surround {
+  position:absolute;
+  pointer-events:none;
+  color: var(--muted);
+  font-weight:800;
+  opacity:0;
+  transform: translateY(8px) scale(.995);
+  transition: opacity 420ms var(--ease), transform 420ms var(--ease);
+}
+.slide.active .surround {
+  opacity:1;
+  transform: translateY(0) scale(1);
+}
+
+/* four cardinal positions */
+.surround.top { top: 4%; left:50%; transform-origin:center; transform: translateX(-50%); font-size:1.8rem; color: var(--accent); text-align:center; }
+.surround.bottom { bottom: 5%; left:50%; transform-origin:center; transform: translateX(-50%); font-size:1rem; color:#cfe3f2; text-align:center; }
+.surround.left { left:4%; top:50%; transform-origin:left center; transform: translateY(-50%); width:220px; text-align:right; }
+.surround.right { right:4%; top:50%; transform-origin:right center; transform: translateY(-50%); width:220px; text-align:left; }
+
+/* typography helpers */
+h1.title { margin:0; font-size:2.1rem; letter-spacing:-0.6px; color:inherit; }
+.subtitle { margin-top:6px; font-size:0.98rem; color:#a7c0d5; font-weight:700; }
+.muted { color: var(--muted); font-size:0.95rem; }
+
+/* ============================
+   Controls / UI
+   ============================ */
+.controls {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1200;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.btn {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor:pointer;
+  font-weight:800;
+  background: linear-gradient(180deg, var(--accent), #d97706);
+  color: #081021;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+.btn.secondary { background: linear-gradient(180deg,#3b82f6,#2563eb); color:#fff; }
+.counter { position: fixed; left: 18px; bottom: 18px; color: var(--muted); font-weight:800; z-index:1200; }
+
+/* mini title */
+.mini-title { position: fixed; left:18px; top:18px; z-index:1200; color:var(--muted); font-weight:800; background:var(--glass); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.02); }
+
+/* autoplay toggle */
+.autoplay { display:flex; align-items:center; gap:8px; font-weight:700; color:var(--muted); }
+.autoplay input { width:18px; height:18px; }
+
+/* responsive adjustments */
+@media (max-width: 1000px) {
+  .center-gallery { flex-wrap: wrap; gap: 14px; }
+  .center-gallery .slot { flex: 1 1 45%; max-width: none; }
+  .surround.left, .surround.right { display:none; } /* hide side texts for clarity */
+}
+@media (max-width: 560px) {
+  .center-gallery { flex-direction: column; align-items:center; }
+  .center-gallery .slot { width: 84%; height: auto; aspect-ratio: 1/1; }
+  .surround.top { font-size:1.2rem; top:6%; }
+  .surround.bottom { bottom:6%; }
+}
+
+/* Accessibility helper (visually hidden) */
+.visually-hidden { position:absolute!important; clip:rect(1px,1px,1px,1px); padding:0!important; border:0!important; height:1px!important; width:1px!important; overflow:hidden!important; white-space:nowrap!important; }
+
+/* explicit focus styles for keyboard users */
+.slot:focus { outline: 3px solid rgba(245,158,11,0.45); outline-offset: 3px; }
+
+/* ============================
+   FLIP clone base style (clones appended to body during morph)
+   ============================ */
+.flip-clone {
+  position: fixed !important;
+  z-index: 99999 !important;
+  pointer-events: none !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  box-shadow: 0 28px 70px rgba(2,8,20,0.65) !important;
+  transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+</style>
+</head>
+<body>
+
+<!-- Mini title (top-left) -->
+<div class="mini-title">TechQuest 2025 — Robotics & Rubik’s Challenge</div>
+
+<!-- Slides root -->
+<div class="slides" id="slidesRoot">
+
+  <!-- ============================
+       Slide 1: Opening
+       ============================ -->
+  <section class="slide active" data-index="1" aria-label="Opening slide">
+    <div class="wrapper" role="group" aria-label="Opening">
+      <div class="center-gallery" role="list" aria-label="Opening gallery">
+        <!-- three placeholder images - replace with actual URLs -->
+        <div class="slot" tabindex="0" role="listitem" aria-label="Opening pic 1">
+          <img data-morph="slot1" alt="Opening image 1"
+            src="data:image/svg+xml;utf8,
+              <svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'>
+                <rect width='100%' height='100%' fill='%23071a2a'/>
+                <text x='50%' y='50%' fill='%23f59e0b' font-size='36' font-family='Arial' text-anchor='middle' dominant-baseline='middle'>Opening 1</text>
+              </svg>">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Opening pic 2">
+          <img data-morph="slot2" alt="Opening image 2"
+            src="data:image/svg+xml;utf8,
+              <svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'>
+                <rect width='100%' height='100%' fill='%230a1b2e'/>
+                <text x='50%' y='50%' fill='%23ffffff' font-size='28' font-family='Arial' text-anchor='middle' dominant-baseline='middle'>Opening 2</text>
+              </svg>">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Opening pic 3">
+          <img data-morph="slot3" alt="Opening image 3"
+            src="data:image/svg+xml;utf8,
+              <svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'>
+                <rect width='100%' height='100%' fill='%230b1420'/>
+                <text x='50%' y='50%' fill='%23a7d3ff' font-size='28' font-family='Arial' text-anchor='middle' dominant-baseline='middle'>Opening 3</text>
+              </svg>">
+        </div>
+      </div>
+
+      <!-- surrounding texts -->
+      <div class="surround top"><h1 class="title">TechQuest 2025</h1></div>
+      <div class="surround bottom"><div class="subtitle">SM City Tuguegarao • Sept 18–19, 2025</div></div>
+      <div class="surround left"><div class="muted">Robotics • Innovation</div></div>
+      <div class="surround right"><div class="muted">Rubik’s • Speed</div></div>
+    </div>
+  </section>
+
+  <!-- ============================
+       Slide 2: Champion
+       ============================ -->
+  <section class="slide" data-index="2" aria-label="Champion slide">
+    <div class="wrapper" role="group" aria-label="Champion">
+      <div class="center-gallery" role="list" aria-label="Champion gallery">
+        <!-- keep data-morph values consistent across slides to enable morphing -->
+        <div class="slot" tabindex="0" role="listitem" aria-label="Champion pic 1">
+          <img data-morph="slot1" alt="download.jfif download (1).jfif download (2).jfif" src="download.jfif download (1).jfif download (2).jfif">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Champion pic 2">
+          <img data-morph="slot2" alt="Champion 2" src="champion2.jpg">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Champion pic 3">
+          <img data-morph="slot3" alt="Champion 3" src="champion3.jpg">
+        </div>
+      </div>
+
+      <div class="surround top"><h1 class="title" style="color:var(--accent)">CHAMPION</h1></div>
+      <div class="surround bottom"><div class="subtitle">[Champion Team / School]</div></div>
+      <div class="surround left"><div class="muted">Robot: ZX-01 • Fastest solve</div></div>
+      <div class="surround right"><div class="muted">Coach: — • Score: —</div></div>
+    </div>
+  </section>
+
+  <!-- ============================
+       Slide 3: 1st Runner Up
+       ============================ -->
+  <section class="slide" data-index="3" aria-label="Runner-up slide">
+    <div class="wrapper" role="group" aria-label="Runner Up">
+      <div class="center-gallery" role="list" aria-label="Runner-up gallery">
+        <div class="slot" tabindex="0" role="listitem" aria-label="Runner pic 1">
+          <img data-morph="slot1" alt="Runner 1" src="runner1.jpg">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Runner pic 2">
+          <img data-morph="slot2" alt="Runner 2" src="runner2.jpg">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Runner pic 3">
+          <img data-morph="slot3" alt="Runner 3" src="runner3.jpg">
+        </div>
+      </div>
+
+      <div class="surround top"><h1 class="title" style="color:var(--accent2)">1st RUNNER UP</h1></div>
+      <div class="surround bottom"><div class="subtitle">[Runner-Up Team / School]</div></div>
+      <div class="surround left"><div class="muted">Robot: YR-2 • Notable move</div></div>
+      <div class="surround right"><div class="muted">Coach: — • Score: —</div></div>
+    </div>
+  </section>
+
+  <!-- ============================
+       Slide 4: Highlights
+       ============================ -->
+  <section class="slide" data-index="4" aria-label="Highlights slide">
+    <div class="wrapper" role="group" aria-label="Highlights">
+      <div class="center-gallery" role="list" aria-label="Highlights gallery">
+        <div class="slot" tabindex="0" role="listitem" aria-label="Highlight pic 1">
+          <img data-morph="slot1" alt="Highlight 1" src="highlight1.jpg">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Highlight pic 2">
+          <img data-morph="slot2" alt="Highlight 2" src="highlight2.jpg">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Highlight pic 3">
+          <img data-morph="slot3" alt="Highlight 3" src="highlight3.jpg">
+        </div>
+      </div>
+
+      <div class="surround top"><h1 class="title">Highlights ✨</h1></div>
+      <div class="surround bottom"><div class="subtitle">Awarding • Rubik’s heats • Sumo battles</div></div>
+      <div class="surround left"><div class="muted">Awarding • Winners</div></div>
+      <div class="surround right"><div class="muted">Battles • Best moments</div></div>
+    </div>
+  </section>
+
+  <!-- ============================
+       Slide 5: Closing
+       ============================ -->
+  <section class="slide" data-index="5" aria-label="Closing slide">
+    <div class="wrapper" role="group" aria-label="Closing">
+      <div class="center-gallery" role="list" aria-label="Closing gallery">
+        <div class="slot" tabindex="0" role="listitem" aria-label="Closing pic 1">
+          <img data-morph="slot1" alt="Closing 1" src="close1.jpg">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Closing pic 2">
+          <img data-morph="slot2" alt="Closing 2" src="close2.jpg">
+        </div>
+        <div class="slot" tabindex="0" role="listitem" aria-label="Closing pic 3">
+          <img data-morph="slot3" alt="Closing 3" src="close3.jpg">
+        </div>
+      </div>
+
+      <div class="surround top"><h1 class="title">Congratulations 🎉</h1></div>
+      <div class="surround bottom"><div class="subtitle">See you at TechQuest 2026 🚀</div></div>
+      <div class="surround left"><div class="muted">Special thanks to organizers</div></div>
+      <div class="surround right"><div class="muted">Sponsors & Partners</div></div>
+    </div>
+  </section>
+
+</div> <!-- .slides -->
+
+<!-- Controls -->
+<div class="controls" role="navigation" aria-label="Presentation controls">
+  <button id="prevBtn" class="btn secondary" title="Previous (Left arrow)">Prev</button>
+  <button id="nextBtn" class="btn" title="Next (Right arrow)">Next</button>
+  <label class="autoplay" title="Autoplay toggle">
+    <input type="checkbox" id="autoplayToggle" checked /> Autoplay
+  </label>
+  <label class="autoplay" title="Ken Burns toggle" style="margin-left:8px">
+    <input type="checkbox" id="kenBurnsToggle" checked /> Ken Burns
+  </label>
+</div>
+
+<div class="counter" id="slideCounter" aria-hidden="true">1 / 5</div>
+
+<!-- Visually hidden instructions for screen readers -->
+<div class="visually-hidden" aria-hidden="false">
+  Use Left and Right arrow keys to navigate. Click anywhere on a slide to advance.
+</div>
+
+<script>
+/* =====================================================
+   JavaScript slideshow engine
+   - FLIP morph for slots that share the same data-morph
+   - autoplay, pause on hover
+   - ken burns effect (slow zoom)
+   - keyboard and click navigation
+   - small API for replacing images / going to slide
+   ===================================================== */
+
+(function () {
+  // Basic config
+  const slideDuration = 520; // should match CSS --dur (ms)
+  const autoPlayIntervalMs = 5000; // time between auto slides
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const totalSlides = slides.length;
+  let currentIndex = slides.findIndex(s => s.classList.contains('active'));
+  if (currentIndex < 0) currentIndex = 0;
+  const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const slideCounter = document.getElementById('slideCounter');
+  const autoplayToggle = document.getElementById('autoplayToggle');
+  const kenBurnsToggle = document.getElementById('kenBurnsToggle');
+
+  // Autoplay timer handle
+  let autoplayTimer = null;
+
+  // Busy flag to prevent rapid clicks during morph
+  let busy = false;
+
+  // Helper to update the counter UI
+  function updateCounter() {
+    slideCounter.textContent = `${currentIndex + 1} / ${totalSlides}`;
+  }
+
+  // Utility: get all morphable pairs between two slides
+  function getMorphPairs(fromSlide, toSlide) {
+    const fromMap = {};
+    fromSlide.querySelectorAll('[data-morph]').forEach(el => {
+      const id = el.getAttribute('data-morph');
+      if (id) fromMap[id] = el;
+    });
+    const pairs = [];
+    toSlide.querySelectorAll('[data-morph]').forEach(toEl => {
+      const id = toEl.getAttribute('data-morph');
+      const fromEl = fromMap[id];
+      if (fromEl) pairs.push({id, fromEl, toEl});
+    });
+    return pairs;
+  }
+
+  // Create a fixed-position clone with same visuals as el
+  function createClone(el) {
+    const rect = el.getBoundingClientRect();
+    const clone = el.cloneNode(true);
+    clone.classList.add('flip-clone');
+    // apply inline styles to match rect
+    clone.style.left = rect.left + 'px';
+    clone.style.top = rect.top + 'px';
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    clone.style.margin = '0';
+    clone.style.transform = 'none';
+    clone.style.opacity = '1';
+    clone.style.borderRadius = getComputedStyle(el).borderRadius;
+    // if it's an <img>, ensure image fits
+    const img = clone.querySelector('img');
+    if (img) {
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+    }
+    document.body.appendChild(clone);
+    return { clone, rect };
+  }
+
+  // FLIP-style morph: animate clones from 'from' rect to 'to' rect
+  function performFlip(fromSlide, toSlide, pairs) {
+    return new Promise((resolve) => {
+      if (!pairs.length) {
+        // no morph targets -> fallback crossfade
+        fromSlide.classList.remove('active');
+        toSlide.classList.add('active');
+        currentIndex = slides.indexOf(toSlide);
+        updateCounter();
+        return resolve();
+      }
+
+      // Prepare: make toSlide active but invisible to get layout
+      toSlide.classList.add('active');
+      toSlide.style.opacity = '0';
+      toSlide.style.pointerEvents = 'none';
+      fromSlide.style.pointerEvents = 'none';
+
+      const clones = [];
+      let finished = 0;
+      const cleanup = () => {
+        clones.forEach(c => c.remove());
+        // unhide originals
+        pairs.forEach(p => {
+          p.fromEl.style.visibility = '';
+          p.toEl.style.visibility = '';
+        });
+        // finalize slides
+        fromSlide.classList.remove('active');
+        toSlide.style.opacity = '';
+        toSlide.style.pointerEvents = '';
+        fromSlide.style.pointerEvents = '';
+        currentIndex = slides.indexOf(toSlide);
+        updateCounter();
+        resolve();
+      };
+
+      // Create clones and animate
+      pairs.forEach(({id, fromEl, toEl}) => {
+        // compute rects
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+        // if zero area skip
+        if (fromRect.width === 0 || fromRect.height === 0 || toRect.width === 0 || toRect.height === 0) {
+          finished++;
+          if (finished >= pairs.length) cleanup();
+          return;
+        }
+
+        // hide originals while animating
+        fromEl.style.visibility = 'hidden';
+        toEl.style.visibility = 'hidden';
+
+        // clone
+        const { clone } = createClone(fromEl);
+        clones.push(clone);
+
+        // compute transform values
+        const dx = toRect.left - fromRect.left;
+        const dy = toRect.top - fromRect.top;
+        const sx = toRect.width / fromRect.width;
+        const sy = toRect.height / fromRect.height;
+
+        // ensure repaint
+        clone.getBoundingClientRect();
+
+        // crossfade backbone (slide opacity)
+        setTimeout(() => {
+          fromSlide.style.transition = `opacity ${slideDuration}ms ${getComputedStyle(document.documentElement).getPropertyValue('--ease') || 'ease'}`;
+          toSlide.style.transition = `opacity ${slideDuration}ms ${getComputedStyle(document.documentElement).getPropertyValue('--ease') || 'ease'}`;
+          fromSlide.style.opacity = '0';
+          toSlide.style.opacity = '1';
+        }, 10);
+
+        // animate clone transform
+        clone.style.transition = `transform ${slideDuration}ms var(--ease), opacity ${slideDuration}ms var(--ease)`;
+        requestAnimationFrame(() => {
+          clone.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+        });
+
+        // wait for transition end
+        const onEnd = () => {
+          clone.removeEventListener('transitionend', onEnd);
+          // small fade out
+          clone.style.opacity = '0';
+          setTimeout(() => {
+            try { clone.remove(); } catch(e) {}
+            toEl.style.visibility = '';
+            finished++;
+            if (finished >= pairs.length) {
+              // small delay for slides crossfade to complete
+              setTimeout(cleanup, 30);
+            }
+          }, 40);
+        };
+        clone.addEventListener('transitionend', onEnd);
+
+        // safety fallback
+        setTimeout(() => {
+          if (document.body.contains(clone)) {
+            try { clone.remove(); } catch(e) {}
+            toEl.style.visibility = '';
+            finished++;
+            if (finished >= pairs.length) setTimeout(cleanup, 30);
+          }
+        }, slideDuration + 600);
+      });
+
+      // absolute safety fallback
+      setTimeout(() => {
+        cleanup();
+      }, slideDuration + 1200);
+    });
+  }
+
+  // function to perform slide change using FLIP morph where possible
+  async function goTo(targetIndex) {
+    if (busy) return;
+    busy = true;
+    const fromSlide = slides[currentIndex];
+    const toSlide = slides[(targetIndex + totalSlides) % totalSlides];
+    // gather pairs
+    const pairs = getMorphPairs(fromSlide, toSlide);
+    // perform flip
+    await performFlip(fromSlide, toSlide, pairs);
+    busy = false;
+  }
+
+  // next/prev wrappers
+  function nextSlide() { goTo(currentIndex + 1); }
+  function prevSlide() { goTo(currentIndex - 1); }
+
+  // keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { nextSlide(); }
+    if (e.key === 'ArrowLeft') { prevSlide(); }
+  });
+
+  // click-to-advance: click the wrapper area to go next
+  document.getElementById('slidesRoot').addEventListener('click', (ev) => {
+    // avoid clicks on controls
+    if (ev.target.closest('.controls') || ev.target.closest('button')) return;
+    nextSlide();
+  });
+
+  // wire up controls
+  nextBtn.addEventListener('click', (e) => { e.stopPropagation(); nextSlide(); });
+  prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prevSlide(); });
+
+  // autoplay behavior
+  function startAutoplay() {
+    stopAutoplay();
+    autoplayTimer = setInterval(() => {
+      nextSlide();
+    }, autoPlayIntervalMs);
+  }
+  function stopAutoplay() { if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; } }
+
+  // toggle autoplay input
+  autoplayToggle.addEventListener('change', (e) => {
+    if (e.target.checked) startAutoplay(); else stopAutoplay();
+  });
+
+  // pause on hover over slidesRoot
+  const slidesRoot = document.getElementById('slidesRoot');
+  slidesRoot.addEventListener('mouseenter', () => { stopAutoplay(); });
+  slidesRoot.addEventListener('mouseleave', () => { if (autoplayToggle.checked) startAutoplay(); });
+
+  // Ken Burns toggle: applies a slow transform to the images
+  kenBurnsToggle.addEventListener('change', (e) => {
+    const activeImgs = slides[currentIndex].querySelectorAll('.center-gallery img');
+    activeImgs.forEach(img => {
+      if (e.target.checked) {
+        img.style.transform = `scale(${1})`; // reset first, then start slow zoom
+        // small delay to allow reset
+        setTimeout(() => { img.style.transition = 'transform 9s linear'; img.style.transform = `scale(${1.06})`; }, 40);
+      } else {
+        img.style.transition = 'transform 420ms ease'; img.style.transform = 'scale(1)';
+      }
+    });
+  });
+
+  // On slide change, manage Ken Burns for new active slide
+  function applyKenBurnsOnActive() {
+    const allImgs = document.querySelectorAll('.center-gallery img');
+    allImgs.forEach(img => { img.style.transition = 'transform 420ms ease'; img.style.transform = 'scale(1)'; });
+    if (kenBurnsToggle.checked) {
+      const imgs = slides[currentIndex].querySelectorAll('.center-gallery img');
+      imgs.forEach(img => {
+        // slight random stagger to make each slot feel organic
+        const delay = Math.random() * 400;
+        setTimeout(() => { img.style.transition = 'transform 9s linear'; img.style.transform = `scale(${1.06})`; }, delay);
+      });
+    }
+  }
+
+  // Start autoplay if toggled on load
+  if (autoplayToggle.checked) startAutoplay();
+
+  // Ensure starting counter
+  updateCounter();
+
+  // Hook into goTo to update counter and apply Ken Burns after finished
+  // We'll wrap the original goTo with an updater
+  const originalGoTo = goTo;
+  goTo = async function(toIndex) {
+    if (busy) return;
+    busy = true;
+    const fromSlide = slides[currentIndex];
+    const toSlide = slides[(toIndex + totalSlides) % totalSlides];
+    const pairs = getMorphPairs(fromSlide, toSlide);
+    await performFlip(fromSlide, toSlide, pairs);
+    // after morph completed, set new index and update counter
+    currentIndex = slides.indexOf(toSlide);
+    updateCounter();
+    // apply ken burns
+    applyKenBurnsOnActive();
+    busy = false;
+  };
+
+  // Expose a small API for external usage (replace images, go to slide)
+  window.Slideshow = {
+    goTo: (i) => { goTo(i - 1); },
+    setImage: (slotId, slideNumber, imageUrl) => {
+      // slotId: 1|2|3 (maps to data-morph "slot1"/"slot2"/"slot3")
+      // slideNumber: 1-based slide number (1..totalSlides)
+      const slide = slides[slideNumber - 1];
+      if (!slide) return;
+      const img = slide.querySelector(`[data-morph="slot${slotId}"]`);
+      if (img) img.src = imageUrl;
+    },
+    next: nextSlide,
+    prev: prevSlide,
+    startAutoplay: startAutoplay,
+    stopAutoplay: stopAutoplay
+  };
+
+  // initial Ken Burns apply
+  applyKenBurnsOnActive();
+
+  // Accessibility: allow Enter on focused slot to advance
+  document.querySelectorAll('.slot').forEach(slot => {
+    slot.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') nextSlide();
+    });
+  });
+
+  // Ensure we update counter when user changes slides via other methods
+  // (the goTo wrapper already updates; next/prev use goTo)
+
+  // A helpful console hint for power users
+  console.info('Slideshow ready. Use Slideshow.setImage(slotId, slideNumber, imageUrl) and Slideshow.goTo(slideNumber).');
+
+})(); // end IIFE
+</script>
+
+</body>
+</html>
