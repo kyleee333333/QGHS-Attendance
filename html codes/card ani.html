@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Unimaginable Animation — Interactive Cards</title>
+    <style>
+      :root{
+        --bg:#07060a;
+        --glass: rgba(255,255,255,0.06);
+        --accent: #8a5cff;
+        --accent2:#00e0ff;
+        --text:#eaf0ff;
+        --card-grad-1: 260; /* hue */
+        --card-grad-2: 190; /* hue */
+      }
+      html,body{height:100%;}
+      body{
+        margin:0;
+        height:100vh;
+        overflow:hidden;
+        background: radial-gradient(1200px 600px at 10% 20%, rgba(138,92,255,0.12), transparent),
+                    radial-gradient(900px 500px at 90% 80%, rgba(0,224,255,0.08), transparent),
+                    var(--bg);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        color:var(--text);
+        -webkit-font-smoothing:antialiased;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      }
+
+      /* full canvas background for particles */
+      #bg-canvas{ position:fixed; inset:0; width:100%; height:100%; z-index:0; }
+
+      /* gooey SVG layer */
+      .gooey{ position:fixed; inset:0; z-index:1; pointer-events:none; mix-blend-mode:screen; }
+
+      /* center stage for cards */
+      .stage{
+        position:relative;
+        z-index:2;
+        display:flex;
+        gap:28px;
+        padding:48px;
+        align-items:center;
+        justify-content:center;
+        width:100%;
+        box-sizing:border-box;
+      }
+
+      .cards{
+        display:flex;
+        gap:28px;
+        transform-style:preserve-3d;
+        perspective:1200px;
+      }
+
+  .card{
+        --w:360px; --h:220px;
+        width:var(--w);
+        height:var(--h);
+        border-radius:18px;
+        position:relative;
+  background: linear-gradient(135deg, hsl(var(--card-grad-1), 80%, 56%), hsl(calc(var(--card-grad-2) + 30), 70%, 55%));
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(138,92,255,0.06) inset;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:var(--text);
+        overflow:hidden;
+        cursor:pointer;
+        border:1px solid rgba(255,255,255,0.04);
+        backdrop-filter: blur(8px) saturate(120%);
+        -webkit-backdrop-filter: blur(8px) saturate(120%);
+        transition:transform 0.45s cubic-bezier(.2,.9,.3,1), box-shadow 0.25s;
+        user-select:none;
+        outline:none;
+      }
+
+      .card:focus{ box-shadow: 0 20px 80px rgba(0,0,0,0.6), 0 0 80px rgba(138,92,255,0.14); transform:translateZ(40px) scale(1.03); }
+
+      .card .label{
+        font-weight:700; letter-spacing:0.6px; font-size:1.45rem; z-index:4; pointer-events:none;
+      }
+
+      /* neon accents */
+  .card::before{
+        content:''; position:absolute; inset:0; pointer-events:none; z-index:1;
+  background: linear-gradient(120deg, hsla(var(--card-grad-1),85%,60%,0.18), hsla(var(--card-grad-2),85%,60%,0.12));
+        mix-blend-mode:overlay; transform:translateZ(-20px) scale(1.06);
+        transition:opacity .35s;
+      }
+
+      .card .shine{ position:absolute; inset:0; background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02)); transform: translateX(-60%); mix-blend-mode:soft-light; z-index:3; }
+
+      .card .panel{
+        position:absolute; right:-30%; top:-30%; width:180%; height:180%; background:radial-gradient(circle at 20% 20%, hsla(var(--card-grad-1),85%,60%,0.24), transparent 18%), radial-gradient(circle at 80% 80%, hsla(var(--card-grad-2),85%,60%,0.16), transparent 18%); filter:blur(40px); transform: translateZ(-40px); z-index:0; pointer-events:none;
+      }
+
+      /* small helper text */
+      .card .hint{ position:absolute; left:14px; bottom:12px; font-size:0.84rem; opacity:0.8; z-index:4; }
+
+      /* custom cursor */
+      .cursor{ position:fixed; width:22px; height:22px; border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); mix-blend-mode:screen; transition:transform .12s ease, width .12s ease, height .12s ease, background .12s ease; }
+      .cursor.dot{ background: radial-gradient(circle at 35% 35%, #fff8, #0000 40%); box-shadow:0 6px 28px rgba(138,92,255,0.18); }
+
+      .cursor.big{ width:120px; height:120px; border-radius:50%; background: radial-gradient(circle at 40% 35%, rgba(138,92,255,0.15), rgba(0,224,255,0.06) 40%, transparent 60%); filter: blur(8px); }
+
+      /* responsive */
+      @media (max-width:900px){
+        .cards{ flex-direction:column; align-items:center; }
+        .card{ --w:320px; --h:190px; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- animated particle background -->
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <!-- gooey blobs SVG filter layer (visual only) -->
+    <svg class="gooey" width="0" height="0" aria-hidden="true">
+      <defs>
+        <filter id="goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+          <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
+          <feBlend in="SourceGraphic" in2="goo" />
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="stage">
+      <div class="cards" id="cards" role="list">
+        <a class="card" data-url="https://github.com/" tabindex="0" role="listitem">
+          <div class="panel"></div>
+          <div class="shine"></div>
+          <div class="label">GitHub</div>
+          <div class="hint">Open in new tab</div>
+        </a>
+        <a class="card" data-url="https://docs.github.com/" tabindex="0" role="listitem">
+          <div class="panel"></div>
+          <div class="shine"></div>
+          <div class="label">Docs</div>
+          <div class="hint">Open in new tab</div>
+        </a>
+        <a class="card" data-url="https://copilot.github.com/" tabindex="0" role="listitem">
+          <div class="panel"></div>
+          <div class="shine"></div>
+          <div class="label">Copilot</div>
+          <div class="hint">Open in new tab</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- custom cursor elements -->
+    <div id="cursor" class="cursor dot"></div>
+    <div id="cursorLarge" class="cursor" style="opacity:.75"></div>
+
+    <script>
+      // Tiny utility
+      const $ = (s, root=document) => root.querySelector(s);
+
+      // Canvas background: particle system with depth and mouse interaction
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let W = canvas.width = innerWidth;
+      let H = canvas.height = innerHeight;
+
+      window.addEventListener('resize', ()=>{ W=canvas.width=innerWidth; H=canvas.height=innerHeight; initParticles(); });
+
+      // particles
+      let pts = [];
+      const PT_COUNT = Math.round((innerWidth*innerHeight)/65000) + 40; // density relative to screen
+
+      function rand(min,max){ return Math.random()*(max-min)+min; }
+
+      function initParticles(){
+        pts = [];
+        for(let i=0;i<PT_COUNT;i++){
+          pts.push({
+            x: Math.random()*W,
+            y: Math.random()*H,
+            vx: rand(-0.2,0.6),
+            vy: rand(-0.15,0.15),
+            r: rand(0.6,2.6),
+            hue: rand(180,320),
+            depth: Math.random()
+          });
+        }
+      }
+      initParticles();
+
+  let mouse = {x:W/2,y:H/2,down:false};
+  // hue sampled by cursor (0-360)
+  let currentHue = 260;
+  window.addEventListener('mousemove', (e)=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
+      window.addEventListener('mousedown', ()=>mouse.down=true);
+      window.addEventListener('mouseup', ()=>mouse.down=false);
+
+      function draw(){
+        ctx.clearRect(0,0,W,H);
+        // subtle vignette
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        ctx.fillRect(0,0,W,H);
+
+        for(const p of pts){
+          // move
+          p.x += p.vx * (1 + p.depth*1.6);
+          p.y += p.vy * (1 + p.depth*1.1);
+
+          // wrap
+          if(p.x < -50) p.x = W + 50;
+          if(p.x > W + 50) p.x = -50;
+          if(p.y < -50) p.y = H + 50;
+          if(p.y > H + 50) p.y = -50;
+
+          // mouse repulse
+          const dx = p.x - mouse.x; const dy = p.y - mouse.y; const d2 = dx*dx+dy*dy;
+          if(d2 < 40000){
+            const f = (40000 - d2)/40000;
+            p.x += (dx/200) * f * (mouse.down?4:1);
+            p.y += (dy/200) * f * (mouse.down?4:1);
+          }
+
+          // draw glow
+          const g = ctx.createRadialGradient(p.x,p.y,p.r*0.25,p.x,p.y,p.r*8 + p.depth*20);
+          // bias particle hue toward currentHue for colorful interaction
+          const hue = p.hue * 0.2 + currentHue * 0.8;
+          g.addColorStop(0, `hsla(${hue},85%,70%,${0.85 - p.depth*0.5})`);
+          g.addColorStop(0.4, `hsla(${(hue+30)%360},85%,60%,${0.28 - p.depth*0.18})`);
+          g.addColorStop(1, `rgba(0,0,0,0)`);
+          ctx.fillStyle=g;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r*8 + p.depth*20,0,Math.PI*2); ctx.fill();
+        }
+
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+
+      // interactive cards: 3D parallax and color ripple
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card=>{
+        card.addEventListener('mousemove', (e)=>{
+          const r = card.getBoundingClientRect();
+          const cx = r.left + r.width/2; const cy = r.top + r.height/2;
+          const dx = e.clientX - cx; const dy = e.clientY - cy;
+          const rx = (dy / r.height) * 16; const ry = -(dx / r.width) * 18;
+          card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(8px)`;
+          // move panel slightly for parallax
+          const panel = card.querySelector('.panel');
+          if(panel) panel.style.transform = `translate(${-(dx*0.06)}px, ${-(dy*0.06)}px) rotate(${dx*0.02}deg)`;
+          // change card gradient hues based on cursor position and global hue
+          const nx = (e.clientX - r.left) / r.width;
+          const ny = (e.clientY - r.top) / r.height;
+          // compute a local hue based on position and global currentHue
+          const localHue = Math.round((nx*120 + ny*240 + currentHue) % 360);
+          const localHue2 = Math.round((localHue + 110) % 360);
+          card.style.setProperty('--card-grad-1', localHue);
+          card.style.setProperty('--card-grad-2', localHue2);
+          // nudge currentHue slowly toward localHue for smooth transitions
+          currentHue += (localHue - currentHue) * 0.12;
+          // update large cursor gradient
+          curL.style.background = `radial-gradient(circle at 40% 35%, hsla(${Math.round(currentHue)},85%,60%,0.22), hsla(${(Math.round(currentHue)+70)%360},85%,60%,0.08) 45%, transparent 65%)`;
+        });
+        card.addEventListener('mouseleave', ()=>{
+          card.style.transform = '';
+          const panel = card.querySelector('.panel'); if(panel) panel.style.transform='';
+        });
+        card.addEventListener('click', ()=>{ window.open(card.dataset.url, '_blank'); });
+        card.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') window.open(card.dataset.url,'_blank'); });
+      });
+
+      // cursor elements
+      const cur = document.getElementById('cursor');
+      const curL = document.getElementById('cursorLarge');
+      let curTimer = null;
+      window.addEventListener('mousemove', (e)=>{
+        cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+        curL.style.left = e.clientX + 'px'; curL.style.top = e.clientY + 'px';
+      });
+
+      // enlarge cursor when hovering cards
+      document.querySelectorAll('.card').forEach(c=>{
+        c.addEventListener('mouseenter', ()=>{ cur.classList.add('big'); curL.classList.add('big'); cur.style.width='18px'; cur.style.height='18px'; curL.classList.add('big'); curL.style.opacity='0.95'; });
+        c.addEventListener('mouseleave', ()=>{ cur.classList.remove('big'); curL.classList.remove('big'); cur.style.width='22px'; cur.style.height='22px'; curL.style.opacity='0.75'; });
+      });
+
+      // small accessibility: keyboard focus outline and instruction
+      cards.forEach(c=>{
+        c.addEventListener('focus', ()=> c.scrollIntoView({behavior:'smooth', block:'center'}));
+      });
+
+      // initial particle tweak on interaction + colorful ripple
+      window.addEventListener('click', (e)=>{
+        // burst particles with hue near currentHue
+        for(let i=0;i<18;i++) pts.push({ x:e.clientX + rand(-24,24), y:e.clientY+rand(-24,24), vx:rand(-4,4), vy:rand(-4,4), r:rand(0.8,4.2), hue: currentHue + rand(-40,40), depth:Math.random() });
+
+        // colorful ripple (visual ring) drawn briefly on canvas
+        const ripple = { x:e.clientX, y:e.clientY, t:0, hue: currentHue };
+        const rippleAnim = ()=>{
+          ripple.t += 1;
+          const alpha = Math.max(0, 0.9 - ripple.t * 0.02);
+          const rad = ripple.t * 8 + 10;
+          ctx.beginPath();
+          ctx.lineWidth = 2 + ripple.t * 0.12;
+          ctx.strokeStyle = `hsla(${ripple.hue},85%,60%,${alpha})`;
+          ctx.arc(ripple.x, ripple.y, rad, 0, Math.PI*2);
+          ctx.stroke();
+          if(alpha > 0.02) requestAnimationFrame(rippleAnim);
+        };
+        requestAnimationFrame(rippleAnim);
+      });
+
+      // small visual tweak - animate shine sweep on hover using CSS-like animation via JS
+      function sweep(card){
+        const shine = card.querySelector('.shine');
+        if(!shine) return;
+        shine.style.transition = 'transform 0.9s cubic-bezier(.2,.9,.3,1)';
+        shine.style.transform = 'translateX(120%)';
+        setTimeout(()=>{ shine.style.transition=''; shine.style.transform='translateX(-60%)'; }, 1000);
+      }
+      cards.forEach(c=>{ c.addEventListener('mouseenter', ()=> sweep(c)); });
+
+      // accessibility: allow keyboard navigation with arrows
+      const cardArray = Array.from(cards);
+      document.addEventListener('keydown', (e)=>{
+        const active = document.activeElement;
+        if(!cardArray.includes(active)) return;
+        const idx = cardArray.indexOf(active);
+        if(e.key === 'ArrowRight') cardArray[(idx+1)%cardArray.length].focus();
+        if(e.key === 'ArrowLeft') cardArray[(idx-1+cardArray.length)%cardArray.length].focus();
+      });
+
+      // handy helpers
+      function rand(min,max){ return Math.random()*(max-min)+min; }
+
+      // initial responsive sizing
+      (function resizeOnce(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; })();
+
+      // tiny performance safeguard: pause drawing when hidden
+      document.addEventListener('visibilitychange', ()=>{ if(document.hidden) cancelAnimationFrame(draw); else requestAnimationFrame(draw); });
+    </script>
+  </body>
+</html>
