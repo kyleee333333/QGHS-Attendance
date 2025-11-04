@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz App</title>
+<title>Student Quiz</title>
 <style>
   body {
     font-family: "Segoe UI", sans-serif;
@@ -13,17 +13,32 @@
     padding: 0;
     min-height: 100vh;
   }
-  .container {
+  .box {
     max-width: 700px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.1);
     margin: 60px auto;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(0,0,0,0.4);
   }
-  h1 {
-    text-align: center;
+  h1, h2 { text-align:center; }
+  input {
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+    border:none;
+    border-radius:6px;
   }
+  button {
+    background:#2f6fa5;
+    border:none;
+    padding:10px 15px;
+    color:#fff;
+    border-radius:6px;
+    margin-top:15px;
+    cursor:pointer;
+  }
+  button:hover { background:#3c8fd1; }
   .choice {
     background: rgba(255,255,255,0.15);
     margin: 10px 0;
@@ -32,31 +47,25 @@
     cursor: pointer;
     transition: background 0.3s;
   }
-  .choice:hover {
-    background: rgba(255,255,255,0.25);
-  }
+  .choice:hover { background: rgba(255,255,255,0.25); }
   .correct { background: #1e8449 !important; }
   .wrong { background: #c0392b !important; }
-  #explanation {
-    margin-top: 10px;
-    font-style: italic;
-    color: #dfe6e9;
-  }
-  button {
-    background: #2f6fa5;
-    border: none;
-    padding: 10px 15px;
-    color: #fff;
-    border-radius: 6px;
-    margin-top: 20px;
-    cursor: pointer;
-  }
-  button:hover { background: #3c8fd1; }
+  #explanation { margin-top:10px; font-style:italic; }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Quiz App</h1>
+
+<div class="box" id="studentInfo">
+  <h1>Student Information</h1>
+  <input id="name" placeholder="Full Name">
+  <input id="grade" placeholder="Grade Level">
+  <input id="section" placeholder="Section">
+  <input id="date" type="date">
+  <button onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div class="box" id="quizBox" style="display:none;">
+  <h2>Quiz</h2>
   <div id="quiz"></div>
   <div id="explanation"></div>
   <button id="nextBtn" style="display:none;" onclick="nextQuestion()">Next</button>
@@ -64,13 +73,35 @@
 </div>
 
 <script>
-let questions = JSON.parse(localStorage.getItem("quizData")) || [];
+let student = {};
+let questions = [];
 let current = 0;
 let score = 0;
 
+function startQuiz() {
+  const name = document.getElementById("name").value.trim();
+  const grade = document.getElementById("grade").value.trim();
+  const section = document.getElementById("section").value.trim();
+  const date = document.getElementById("date").value;
+
+  if (!name || !grade || !section || !date) return alert("Please fill out all fields!");
+
+  student = { name, grade, section, date };
+  questions = JSON.parse(localStorage.getItem("quizData")) || [];
+  if (!questions.length) return alert("No quiz data found. Ask admin to add questions.");
+
+  document.getElementById("studentInfo").style.display = "none";
+  document.getElementById("quizBox").style.display = "block";
+  showQuestion();
+}
+
 function showQuestion() {
   if (current >= questions.length) {
-    document.getElementById("quiz").innerHTML = `<h2>Quiz Complete!</h2><p>Your score: ${score}/${questions.length}</p>`;
+    document.getElementById("quiz").innerHTML = `<h3>Quiz Complete!</h3>
+      <p><strong>${student.name}</strong><br>
+      Grade: ${student.grade} | Section: ${student.section}<br>
+      Date: ${student.date}</p>
+      <h3>Score: ${score}/${questions.length}</h3>`;
     document.getElementById("nextBtn").style.display = "none";
     return;
   }
@@ -83,21 +114,21 @@ function showQuestion() {
     <div class="choice" onclick="checkAnswer(this, 'C')">C) ${q.c}</div>
     <div class="choice" onclick="checkAnswer(this, 'D')">D) ${q.d}</div>
   `;
-  document.getElementById("explanation").innerHTML = "";
+  document.getElementById("explanation").innerText = "";
   document.getElementById("nextBtn").style.display = "none";
 }
 
-function checkAnswer(element, choice) {
-  let q = questions[current];
-  const choices = document.querySelectorAll(".choice");
-  choices.forEach(c => c.style.pointerEvents = "none");
-  
+function checkAnswer(el, choice) {
+  const q = questions[current];
+  const all = document.querySelectorAll(".choice");
+  all.forEach(c => c.style.pointerEvents = "none");
+
   if (choice === q.answer) {
-    element.classList.add("correct");
+    el.classList.add("correct");
     score++;
   } else {
-    element.classList.add("wrong");
-    choices.forEach(c => {
+    el.classList.add("wrong");
+    all.forEach(c => {
       if (c.textContent.startsWith(q.answer)) c.classList.add("correct");
     });
   }
@@ -110,8 +141,6 @@ function nextQuestion() {
   current++;
   showQuestion();
 }
-
-showQuestion();
 </script>
 </body>
 </html>

@@ -13,35 +13,25 @@
     padding: 0;
     min-height: 100vh;
   }
-
-  .login, .container {
+  .box {
     max-width: 700px;
+    background: rgba(255,255,255,0.1);
     margin: 60px auto;
-    background: rgba(255, 255, 255, 0.1);
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(0,0,0,0.4);
   }
-
-  h1 {
+  h1, h2 {
     text-align: center;
-    color: #f4f4f4;
   }
-
-  label {
-    display: block;
-    margin-top: 10px;
-    font-weight: 600;
-  }
-
-  input, textarea {
+  label { display:block; margin-top:10px; font-weight:600; }
+  input, textarea, select {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
     border: none;
     border-radius: 6px;
   }
-
   button {
     margin-top: 15px;
     padding: 10px 15px;
@@ -52,31 +42,45 @@
     cursor: pointer;
   }
   button:hover { background: #3c8fd1; }
-
   .question-list {
     margin-top: 30px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255,255,255,0.15);
     padding: 15px;
     border-radius: 8px;
   }
-
   .question-item {
     border-bottom: 1px solid rgba(255,255,255,0.3);
     padding: 10px 0;
   }
-
 </style>
 </head>
 <body>
 
-<div class="login" id="login">
-  <h1>Admin Login</h1>
-  <input type="password" id="adminPass" placeholder="Enter password"><br><br>
-  <button onclick="checkPass()">Login</button>
+<!-- Admin profile creation -->
+<div class="box" id="profileSetup">
+  <h1>Create Admin Profile</h1>
+  <label>Full Name:</label>
+  <input id="adminName" placeholder="e.g. Mr. Adelino Cruz">
+  <label>Password:</label>
+  <input id="adminPass" type="password" placeholder="Create a personal password">
+  <button onclick="createProfile()">Save Profile</button>
+  <p style="font-size:0.9em;opacity:0.8;">(If you already have a profile, skip to login below.)</p>
 </div>
 
-<div class="container" id="adminPanel" style="display:none;">
-  <h1>Quiz Management</h1>
+<!-- Admin login -->
+<div class="box" id="loginBox">
+  <h1>Admin Login</h1>
+  <label>Select Profile:</label>
+  <select id="loginName"></select>
+  <label>Password:</label>
+  <input type="password" id="loginPassword">
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- Admin panel -->
+<div class="box" id="adminPanel" style="display:none;">
+  <h2>Quiz Management</h2>
+  <p id="welcome"></p>
 
   <label>Question:</label>
   <textarea id="question" rows="2"></textarea>
@@ -100,67 +104,97 @@
 </div>
 
 <script>
-const PASSWORD = "QGHSAdmin";
+// ====== ADMIN PROFILE CREATION ======
+function createProfile() {
+  let name = document.getElementById("adminName").value.trim();
+  let pass = document.getElementById("adminPass").value.trim();
 
-function checkPass() {
-  const input = document.getElementById("adminPass").value;
-  if (input === PASSWORD) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-    showQuestions();
-  } else {
-    alert("Incorrect password!");
-  }
+  if (!name || !pass) return alert("Please fill all fields!");
+
+  let admins = JSON.parse(localStorage.getItem("adminProfiles")) || [];
+  if (admins.some(a => a.name === name)) return alert("Profile already exists!");
+
+  admins.push({ name, pass });
+  localStorage.setItem("adminProfiles", JSON.stringify(admins));
+  alert("Profile saved!");
+  loadProfiles();
 }
 
+// ====== LOAD EXISTING ADMIN NAMES ======
+function loadProfiles() {
+  let admins = JSON.parse(localStorage.getItem("adminProfiles")) || [];
+  let select = document.getElementById("loginName");
+  select.innerHTML = "<option value=''>Select</option>";
+  admins.forEach(a => {
+    let opt = document.createElement("option");
+    opt.text = a.name;
+    select.add(opt);
+  });
+}
+loadProfiles();
+
+// ====== LOGIN ======
+function login() {
+  let name = document.getElementById("loginName").value;
+  let pass = document.getElementById("loginPassword").value;
+
+  let admins = JSON.parse(localStorage.getItem("adminProfiles")) || [];
+  let admin = admins.find(a => a.name === name && a.pass === pass);
+
+  if (!admin) return alert("Invalid name or password!");
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("profileSetup").style.display = "none";
+  document.getElementById("adminPanel").style.display = "block";
+  document.getElementById("welcome").innerText = `Welcome, ${admin.name}!`;
+  showQuestions();
+}
+
+// ====== ADD QUESTION ======
 function addQuestion() {
   const q = document.getElementById("question").value.trim();
   const a = document.getElementById("a").value.trim();
   const b = document.getElementById("b").value.trim();
   const c = document.getElementById("c").value.trim();
   const d = document.getElementById("d").value.trim();
-  const answer = document.getElementById("answer").value.trim().toUpperCase();
-  const explanation = document.getElementById("explanation").value.trim();
+  const ans = document.getElementById("answer").value.trim().toUpperCase();
+  const expl = document.getElementById("explanation").value.trim();
 
-  if (!q || !a || !b || !c || !d || !answer || !explanation) {
-    alert("Please complete all fields.");
-    return;
-  }
+  if (!q || !a || !b || !c || !d || !ans || !expl)
+    return alert("Please complete all fields!");
 
-  let questions = JSON.parse(localStorage.getItem("quizData")) || [];
-  questions.push({ question: q, a, b, c, d, answer, explanation });
-  localStorage.setItem("quizData", JSON.stringify(questions));
+  let data = JSON.parse(localStorage.getItem("quizData")) || [];
+  data.push({ question: q, a, b, c, d, answer: ans, explanation: expl });
+  localStorage.setItem("quizData", JSON.stringify(data));
+
   alert("Question added!");
   showQuestions();
-
   document.querySelectorAll("input, textarea").forEach(el => el.value = "");
 }
 
+// ====== SHOW QUESTIONS ======
 function showQuestions() {
-  let questions = JSON.parse(localStorage.getItem("quizData")) || [];
-  const list = document.getElementById("questionList");
+  let data = JSON.parse(localStorage.getItem("quizData")) || [];
+  let list = document.getElementById("questionList");
   list.innerHTML = "<h3>Stored Questions:</h3>";
-  questions.forEach((q, i) => {
+  data.forEach((q, i) => {
     list.innerHTML += `
       <div class="question-item">
         <strong>${i+1}. ${q.question}</strong><br>
-        A) ${q.a}<br>
-        B) ${q.b}<br>
-        C) ${q.c}<br>
-        D) ${q.d}<br>
-        <em>Answer:</em> ${q.answer} <br>
+        A) ${q.a}<br>B) ${q.b}<br>C) ${q.c}<br>D) ${q.d}<br>
+        <em>Answer:</em> ${q.answer}<br>
         <small>Explanation:</small> ${q.explanation}
       </div>`;
   });
 }
 
+// ====== CLEAR QUESTIONS ======
 function clearQuestions() {
-  if (confirm("Are you sure you want to delete all questions?")) {
+  if (confirm("Delete all questions?")) {
     localStorage.removeItem("quizData");
     showQuestions();
   }
 }
 </script>
-
 </body>
 </html>
