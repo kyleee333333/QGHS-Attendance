@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz App</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #800000, #1b3b5f);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 700px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 60px auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  }
+  h1 {
+    text-align: center;
+  }
+  .choice {
+    background: rgba(255,255,255,0.15);
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .choice:hover {
+    background: rgba(255,255,255,0.25);
+  }
+  .correct { background: #1e8449 !important; }
+  .wrong { background: #c0392b !important; }
+  #explanation {
+    margin-top: 10px;
+    font-style: italic;
+    color: #dfe6e9;
+  }
+  button {
+    background: #2f6fa5;
+    border: none;
+    padding: 10px 15px;
+    color: #fff;
+    border-radius: 6px;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  button:hover { background: #3c8fd1; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Quiz App</h1>
+  <div id="quiz"></div>
+  <div id="explanation"></div>
+  <button id="nextBtn" style="display:none;" onclick="nextQuestion()">Next</button>
+  <div id="result"></div>
+</div>
+
+<script>
+let questions = JSON.parse(localStorage.getItem("quizData")) || [];
+let current = 0;
+let score = 0;
+
+function showQuestion() {
+  if (current >= questions.length) {
+    document.getElementById("quiz").innerHTML = `<h2>Quiz Complete!</h2><p>Your score: ${score}/${questions.length}</p>`;
+    document.getElementById("nextBtn").style.display = "none";
+    return;
+  }
+
+  let q = questions[current];
+  document.getElementById("quiz").innerHTML = `
+    <h3>${current + 1}. ${q.question}</h3>
+    <div class="choice" onclick="checkAnswer(this, 'A')">A) ${q.a}</div>
+    <div class="choice" onclick="checkAnswer(this, 'B')">B) ${q.b}</div>
+    <div class="choice" onclick="checkAnswer(this, 'C')">C) ${q.c}</div>
+    <div class="choice" onclick="checkAnswer(this, 'D')">D) ${q.d}</div>
+  `;
+  document.getElementById("explanation").innerHTML = "";
+  document.getElementById("nextBtn").style.display = "none";
+}
+
+function checkAnswer(element, choice) {
+  let q = questions[current];
+  const choices = document.querySelectorAll(".choice");
+  choices.forEach(c => c.style.pointerEvents = "none");
+  
+  if (choice === q.answer) {
+    element.classList.add("correct");
+    score++;
+  } else {
+    element.classList.add("wrong");
+    choices.forEach(c => {
+      if (c.textContent.startsWith(q.answer)) c.classList.add("correct");
+    });
+  }
+
+  document.getElementById("explanation").innerText = "Explanation: " + q.explanation;
+  document.getElementById("nextBtn").style.display = "inline-block";
+}
+
+function nextQuestion() {
+  current++;
+  showQuestion();
+}
+
+showQuestion();
+</script>
+</body>
+</html>

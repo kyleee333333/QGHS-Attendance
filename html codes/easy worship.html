@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EasyWorship — Lightweight Clone (Offline)</title>
+  <style>
+    /* Basic reset and layout */
+    :root{--bg:#0f1724;--panel:#0b1220;--accent:#ffd166;--muted:#94a3b8;}
+    *{box-sizing:border-box;font-family:Inter,Segoe UI,system-ui,Arial,sans-serif}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071226 0%, #071b2a 100%);color:#e6eef6}
+    header{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.04)}
+    header h1{font-size:18px;margin:0;color:var(--accent)}
+    .container{display:grid;grid-template-columns:320px 1fr 420px;gap:16px;padding:18px}
+    .panel{background:rgba(255,255,255,0.03);border-radius:12px;padding:12px}
+    .left{min-height:60vh}
+    .center{min-height:60vh}
+    .right{min-height:60vh}
+    .tabbar{display:flex;gap:8px;margin-bottom:12px}
+    .tab{padding:8px 12px;border-radius:8px;cursor:pointer;background:transparent;border:1px solid transparent}
+    .tab.active{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06)}
+    input.search{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    ul.list{list-style:none;margin:0;padding:0;max-height:52vh;overflow:auto}
+    li.item{padding:10px;border-radius:8px;margin-bottom:8px;cursor:pointer}
+    li.item:hover{background:rgba(255,255,255,0.02)}
+    .meta{font-size:13px;color:var(--muted)}
+    /* Player */
+    .player{display:flex;flex-direction:column;gap:8px}
+    .player-controls{display:flex;align-items:center;gap:8px}
+    button.btn{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#062026;cursor:pointer}
+    .lyrics{
+      white-space:pre-wrap;
+      font-size:20px;
+      line-height:1.5;
+      padding:12px;
+      border-radius:8px;
+    }
+
+    .presentation{
+      position:fixed;
+      inset:0;
+      background:#000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+  .presentation::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35));pointer-events:none}
+  .presentation .presentation-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .presentation .slide{color:var(--accent);font-size:clamp(28px,6vw,120px);padding:28px;text-align:center;position:relative;z-index:1;max-width:92%;white-space:pre-wrap;line-height:1.2;text-shadow:0 6px 24px rgba(0,0,0,0.8),0 2px 6px rgba(0,0,0,0.6)}
+    /* Bible panel */
+    .bible-controls{display:flex;gap:8px;align-items:center}
+    select,button{background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px}
+    .verse{padding:8px;border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,0.01)}
+    footer{padding:12px;text-align:center;color:var(--muted)}
+    /* responsive */
+    @media (max-width:1000px){.container{grid-template-columns:1fr;}.right{order:3}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>EasyWorship — Clone</h1>
+    <div style="flex:1"></div>
+    <div style="font-size:13px;color:var(--muted)">Offline-ready • KJV support (external file recommended)</div>
+  </header>
+
+  <div class="container">
+    <aside class="panel left">
+      <div class="tabbar">
+        <div class="tab active" data-tab="songs">Songs</div>
+        <div class="tab" data-tab="bible">Bible</div>
+        <div class="tab" data-tab="presentation">Presentation</div>
+      </div>
+      <input class="search" id="globalSearch" placeholder="Search songs or Bible..." />
+
+      <h3 style="margin-top:12px">Songs</h3>
+      <ul id="songList" class="list"></ul>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0" />
+      <h3>Now Playing</h3>
+      <div id="nowPlaying" class="meta">—</div>
+
+      <div style="margin-top:12px">
+        <strong>Instructions</strong>
+        <p class="meta" style="font-size:13px">Place your MP3 files in a folder named <code>songs/audio/</code> and update the songs array in the file header (or host files and use URLs). For full KJV, add <code>bible_kjv.json</code> next to this HTML (see sample format in comments).</p>
+      </div>
+    </aside>
+
+    <main class="panel center">
+      <div id="songView">
+        <h2 id="songTitle">Select a song</h2>
+  <div class="meta" id="songAuthor" aria-live="polite"></div>
+
+        <!-- Slides editor: split lyrics into slides, edit, reorder, set durations -->
+        <div style="margin-top:12px" class="panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <strong>Slides</strong>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label style="font-size:13px">Auto-advance:</label>
+              <select id="autoMode" style="padding:6px;border-radius:6px;background:transparent;color:inherit">
+                <option value="manual">Manual</option>
+                <option value="perSlide">Per-slide</option>
+                <option value="syncAudio">Sync to audio</option>
+              </select>
+              <button id="applySlides" class="small">Apply Slides</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <div style="flex:1">
+              <textarea id="slidesRaw" style="height:160px;background:#06101a;color:var(--text);padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03)"></textarea>
+              <div style="margin-top:8px;font-size:12px;color:var(--muted)">Edit raw slides (separate slides with a blank line). Press Apply to update slides below.</div>
+            </div>
+            <div style="width:280px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><strong>Slide List</strong><div id="slideCount" style="font-size:12px;color:var(--muted)"></div></div>
+              <div id="slideList" style="margin-top:8px;max-height:220px;overflow:auto;border-radius:6px;padding:6px;background:rgba(255,255,255,0.01)"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="player">
+          <audio id="audioPlayer" preload="none"></audio>
+          <div class="player-controls">
+            <button class="btn" id="prevBtn">Prev</button>
+            <button class="btn" id="playBtn">Play</button>
+            <button class="btn" id="nextBtn">Next</button>
+            <button class="btn" id="presentBtn">Presentation</button>
+            <button class="btn" id="presenterBtn">Presenter View</button>
+            <input id="seek" type="range" min="0" max="100" value="0" style="flex:1" />
+            <input id="vol" type="range" min="0" max="1" step="0.01" value="1" style="width:100px" />
+          </div>
+        </div>
+      </div>
+
+      <div id="bibleView" style="display:none">
+        <h2>Bible (KJV)</h2>
+        <div class="bible-controls">
+          <select id="bookSelect"></select>
+          <select id="chapterSelect"></select>
+          <button id="loadChapter">Load</button>
+          <input id="verseSearch" placeholder="search within chapter" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)" />
+        </div>
+        <div id="chapterArea" style="margin-top:12px;max-height:50vh;overflow:auto"></div>
+      </div>
+    </main>
+
+    <aside class="panel right">
+      <h3>Queue</h3>
+      <ul id="queueList" class="list"></ul>
+
+      <h3 style="margin-top:12px">Presentation Controls</h3>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="slidePrev">Prev</button>
+        <button id="slideNext">Next</button>
+        <button id="toggleFull">Toggle Fullscreen</button>
+      </div>
+
+      <h3 style="margin-top:12px">Examples / Debug</h3>
+      <pre style="font-size:12px;color:var(--muted);max-height:200px;overflow:auto">This single-file app contains:
+- songs[] sample (edit to add your library)
+- ability to load external bible_kjv.json (place next to this html)
+- presentation mode (F11-like)</pre>
+      <h3 style="margin-top:12px">Background Media (per-song)</h3>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <input id="bgImage" placeholder="Background image URL or path" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04)" />
+        <input id="bgVideo" placeholder="Background video URL or path (mp4)" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04)" />
+        <div style="display:flex;gap:8px"><button id="saveBg">Save to song</button><button id="clearBg">Clear</button></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="presentation" id="presentationScreen"><div class="slide" id="presentationSlide"></div></div>
+
+  <footer>Made with ❤️ — Drop your MP3s in <code>songs/audio/</code> and add <code>bible_kjv.json</code> for full Bible text.</footer>
+
+  <script>
+    /********************************************
+     * SAMPLE DATA
+     * Edit the songs array below to include your actual files
+     * Example song object fields: {id,title,author,lyrics,audio}
+     * If you have many songs, you may prefer an external songs.json
+     ********************************************/
+    // Lightweight on-page debug overlay to capture runtime errors and unhandled promise rejections.
+    // This helps you see errors when opening the file locally (no devtools required).
+    (function(){
+      function makeDbg(){
+        const d = document.createElement('div'); d.id = 'ew-debug';
+        d.style.cssText = 'position:fixed;right:12px;bottom:12px;max-width:420px;max-height:220px;overflow:auto;background:rgba(0,0,0,0.75);color:#fff;font-family:monospace;font-size:12px;padding:10px;border-radius:8px;z-index:2147483647;box-shadow:0 6px 24px rgba(0,0,0,0.6);white-space:pre-wrap;line-height:1.2';
+        d.innerText = 'Debug console (runtime errors)\n---\n';
+        const clear = document.createElement('button'); clear.textContent='Clear'; clear.style.cssText='position:static;margin-left:8px;background:#222;color:#fff;border:0;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px';
+        clear.addEventListener('click',()=>{ d.innerText = 'Debug console (runtime errors)\n---\n'; });
+        const hdr = document.createElement('div'); hdr.style.cssText='display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px'; hdr.innerHTML = '<strong style="font-size:12px">EasyWorship — Debug</strong>';
+        hdr.appendChild(clear);
+        d.innerHTML = '';
+        d.appendChild(hdr);
+        const body = document.createElement('div'); body.id = 'ew-debug-body'; body.style.cssText='max-height:160px;overflow:auto'; d.appendChild(body);
+        document.body.appendChild(d);
+        return body;
+      }
+      const dbgBody = document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', ()=> window.ew_dbg_body = makeDbg()) : (window.ew_dbg_body = makeDbg());
+      function appendDbg(msg){ try{ if(!window.ew_dbg_body) window.ew_dbg_body = makeDbg(); const el = document.createElement('div'); el.textContent = (new Date()).toLocaleTimeString() + ' - ' + msg; window.ew_dbg_body.appendChild(el); window.ew_dbg_body.scrollTop = window.ew_dbg_body.scrollHeight; }catch(e){ console.log('dbg append fail', e); } }
+      window.addEventListener('error', function(ev){ appendDbg('Error: '+ev.message+' @ '+(ev.filename||'<inline>')+':'+(ev.lineno||'?')+':'+(ev.colno||'?')); });
+      window.addEventListener('unhandledrejection', function(ev){ appendDbg('UnhandledRejection: '+(ev.reason && (ev.reason.stack || ev.reason.toString()) || String(ev.reason))); });
+      // convenience logger available to other code
+      window.ewLog = function(){ try{ const args = Array.from(arguments).map(a=>typeof a==='object'?JSON.stringify(a):String(a)).join(' '); appendDbg(args); }catch(e){ console.log(...arguments); } };
+    })();
+
+    const songs = [
+      {
+        id: 's1',
+        title: 'Amazing Grace',
+        author: 'John Newton',
+        audio: 'songs/audio/amazing_grace.mp3',
+        lyrics: `Amazing grace! How sweet the sound
+That saved a wretch like me.
+I once was lost, but now am found;
+Was blind, but now I see.`
+      },
+      {
+        id: 's2',
+        title: 'How Great Thou Art',
+        author: 'Stuart K. Hine',
+        audio: 'songs/audio/how_great_thou_art.mp3',
+        lyrics: `O Lord my God! When I in awesome wonder
+Consider all the worlds Thy Hands have made;
+I see the stars, I hear the rolling thunder,
+Thy power throughout the universe displayed.`
+      }
+    ];
+
+    // Small KJV sample. For the full KJV, place a file named "bible_kjv.json" next to this HTML
+    // Format expected: { "Genesis": {"1": {"1":"In the beginning...", ...}, "2": {...}}, "Exodus": {...} }
+    let bible = {
+      "Genesis": {"1": {"1":"In the beginning God created the heaven and the earth.","2":"And the earth was without form, and void; and darkness was upon the face of the deep..."}},
+      "John": {"3": {"16":"For God so loved the world, that he gave his only begotten Son..."}}
+    };
+
+    /********************************************
+     * App logic (no libraries)
+     ********************************************/
+  const songListEl = document.getElementById('songList');
+  const songTitleEl = document.getElementById('songTitle');
+  const songAuthorEl = document.getElementById('songAuthor');
+  const audio = document.getElementById('audioPlayer');
+  const nowPlaying = document.getElementById('nowPlaying');
+  const queueList = document.getElementById('queueList');
+  const playBtn = document.getElementById('playBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const seek = document.getElementById('seek');
+  const vol = document.getElementById('vol');
+  const presentBtn = document.getElementById('presentBtn');
+  const presenterBtn = document.getElementById('presenterBtn');
+  const presentationScreen = document.getElementById('presentationScreen');
+  const presentationSlide = document.getElementById('presentationSlide');
+  const slidesRaw = document.getElementById('slidesRaw');
+  const slideList = document.getElementById('slideList');
+  const slideCount = document.getElementById('slideCount');
+  const applySlides = document.getElementById('applySlides');
+  const autoMode = document.getElementById('autoMode');
+  const bgImageInput = document.getElementById('bgImage');
+  const bgVideoInput = document.getElementById('bgVideo');
+  const saveBgBtn = document.getElementById('saveBg');
+  const clearBgBtn = document.getElementById('clearBg');
+
+  let currentIndex = -1;
+  let queue = [];
+  // presentation state
+  let presenterWindow = null;
+  let slideTimer = null;
+
+    function renderSongList(filter=''){
+      songListEl.innerHTML = '';
+      const f = filter.toLowerCase();
+      songs.forEach((s,i)=>{
+        if(f && !(`${s.title} ${s.author} ${s.lyrics}`.toLowerCase().includes(f))) return;
+        const li = document.createElement('li'); li.className='item'; li.dataset.index=i;
+        li.innerHTML = `<strong>${s.title}</strong><div class='meta'>${s.author}</div>`;
+        li.onclick = ()=>{ playIndex(i); };
+        songListEl.appendChild(li);
+      });
+    }
+
+    function renderQueue(){
+      queueList.innerHTML='';
+      queue.forEach((idx,pos)=>{
+        const s = songs[idx];
+        const li = document.createElement('li'); li.className='item';
+        li.innerHTML = `<strong>${s.title}</strong><div class='meta'>${s.author}</div>`;
+        li.onclick = ()=>{ playIndex(idx); };
+        queueList.appendChild(li);
+      });
+    }
+
+    function playIndex(i){
+      const s = songs[i];
+      if(!s) return;
+      currentIndex = i;
+      audio.src = s.audio;
+      audio.load();
+      audio.play();
+      songTitleEl.textContent = s.title;
+      songAuthorEl.textContent = s.author;
+      nowPlaying.textContent = `${s.title} — ${s.author}`;
+
+      // Prepare slides editor: if song has prebuilt slides use them, else build from lyrics
+      if(s.slides && Array.isArray(s.slides) && s.slides.length){
+        // normalize into objects
+        s._slides = s.slides.map(sd => ({ text: typeof sd === 'string' ? sd : sd.text || '', duration: sd.duration || 8 }));
+      } else {
+        const raw = (s.lyrics||'').trim();
+        const parts = buildSlidesFromRaw(raw);
+        s._slides = parts.map(t => ({text:t,duration:8}));
+      }
+      // serialize into raw textarea for editing
+      slidesRaw.value = (s._slides||[]).map(x=>x.text).join('\n\n');
+      // populate bg inputs
+      bgImageInput.value = s.backgroundImage || '';
+      bgVideoInput.value = s.backgroundVideo || '';
+      renderSlidesEditor();
+      applyPresentationSlidesFromSong(s);
+    }
+
+    playBtn.addEventListener('click',()=>{
+      if(audio.paused) audio.play(); else audio.pause();
+    });
+    prevBtn.addEventListener('click',()=>{
+      if(currentIndex>0) playIndex(currentIndex-1);
+    });
+    nextBtn.addEventListener('click',()=>{
+      if(currentIndex < songs.length-1) playIndex(currentIndex+1);
+    });
+
+    audio.addEventListener('play',()=>{ playBtn.textContent='Pause'; });
+    audio.addEventListener('pause',()=>{ playBtn.textContent='Play'; });
+    audio.addEventListener('timeupdate',()=>{
+      if(audio.duration){ seek.max = Math.floor(audio.duration); seek.value = Math.floor(audio.currentTime); }
+      // keep presenter updated
+      sendPresenterUpdate();
+    });
+  seek.addEventListener('input',()=>{ audio.currentTime = seek.value; });
+  vol.addEventListener('input',()=>{ audio.volume = Math.max(0, Math.min(1, parseFloat(vol.value) || 0)); });
+    // Presentation helpers
+    function buildSlidesFromRaw(raw){
+      return (raw||'').split(/\n\n+/).map(s=>s.trim()).filter(Boolean);
+    }
+
+    function renderSlidesEditor(){
+      slideList.innerHTML='';
+      const s = songs[currentIndex]; if(!s) return;
+      const slides = s._slides || [];
+      slideCount.textContent = `${slides.length} slides`;
+      slides.forEach((sl,idx)=>{
+        const row = document.createElement('div'); row.style.padding='6px'; row.style.borderBottom='1px solid rgba(255,255,255,0.02)';
+        const txt = document.createElement('div'); txt.style.fontSize='14px'; txt.style.marginBottom='6px'; txt.textContent = sl.text.slice(0,120).replace(/\n/g,' ');
+        const controls = document.createElement('div'); controls.style.display='flex'; controls.style.gap='6px'; controls.style.alignItems='center';
+        const dur = document.createElement('input'); dur.type='number'; dur.value = sl.duration||8; dur.style.width='72px'; dur.min=0.5; dur.step=0.5;
+        dur.addEventListener('change',()=>{ sl.duration = parseFloat(dur.value)||8; });
+        const up = document.createElement('button'); up.textContent='↑'; up.style.padding='4px 6px'; up.addEventListener('click',()=>{ if(idx>0){ s._slides.splice(idx-1,0,s._slides.splice(idx,1)[0]); renderSlidesEditor(); } });
+        const down = document.createElement('button'); down.textContent='↓'; down.style.padding='4px 6px'; down.addEventListener('click',()=>{ if(idx<s._slides.length-1){ s._slides.splice(idx+1,0,s._slides.splice(idx,1)[0]); renderSlidesEditor(); } });
+        const del = document.createElement('button'); del.textContent='✕'; del.style.padding='4px 6px'; del.addEventListener('click',()=>{ s._slides.splice(idx,1); renderSlidesEditor(); });
+        controls.appendChild(dur); controls.appendChild(up); controls.appendChild(down); controls.appendChild(del);
+        row.appendChild(txt); row.appendChild(controls);
+        slideList.appendChild(row);
+      });
+    }
+
+    function applyPresentationSlidesFromSong(s){
+      // convert s._slides to presentationScreen.slides as text array
+      presentationScreen.slides = (s._slides||[]).map(x=>x.text||'');
+      presentationScreen.slideMeta = (s._slides||[]).map(x=>({duration:x.duration||8}));
+      presentationScreen.slideIndex = 0;
+      presentationSlide.textContent = presentationScreen.slides[0] || '';
+      // update presentation background image/video if specified
+      applyBackgroundForSong(s);
+      sendPresenterUpdate();
+      cancelAutoAdvance();
+      maybeScheduleAdvance();
+    }
+
+    function applyBackgroundForSong(s){
+      // if s.backgroundImage set, apply as background; if s.backgroundVideo set, create video tag
+      // Clear any previous video
+      const existing = presentationScreen.querySelector('video.presentation-bg'); if(existing) existing.remove();
+      if(s.backgroundImage){
+        presentationScreen.style.background = `url(${s.backgroundImage}) center/cover no-repeat, #000`;
+      } else presentationScreen.style.background = '#000';
+      if(s.backgroundVideo){
+        const v = document.createElement('video'); v.className='presentation-bg'; v.src = s.backgroundVideo; v.autoplay = true; v.muted = true; v.loop = true; v.style.position='absolute'; v.style.inset='0'; v.style.width='100%'; v.style.height='100%'; v.style.objectFit='cover'; v.style.zIndex='0'; presentationScreen.appendChild(v);
+      }
+      // ensure slide text is above any bg
+      presentationSlide.style.position='relative'; presentationSlide.style.zIndex='1';
+    }
+
+    function presentNext(){
+      const s = presentationScreen.slides||[]; if(!s.length) return;
+      presentationScreen.slideIndex = Math.min((presentationScreen.slideIndex||0)+1,s.length-1);
+      presentationSlide.textContent = s[presentationScreen.slideIndex];
+      sendPresenterUpdate();
+      cancelAutoAdvance();
+      maybeScheduleAdvance();
+    }
+    function presentPrev(){
+      const s = presentationScreen.slides||[]; if(!s.length) return;
+      presentationScreen.slideIndex = Math.max((presentationScreen.slideIndex||0)-1,0);
+      presentationSlide.textContent = s[presentationScreen.slideIndex];
+      sendPresenterUpdate();
+      cancelAutoAdvance();
+      maybeScheduleAdvance();
+    }
+    document.getElementById('slideNext').addEventListener('click',presentNext);
+    document.getElementById('slidePrev').addEventListener('click',presentPrev);
+    document.getElementById('toggleFull').addEventListener('click',()=>{ toggleFullscreen(); });
+
+    presentBtn.addEventListener('click',async ()=>{
+      presentationScreen.style.display='flex';
+      // try to request fullscreen on the presentation element for projector mode
+      try{
+        if(presentationScreen.requestFullscreen) await presentationScreen.requestFullscreen();
+        else if(presentationScreen.webkitRequestFullscreen) await presentationScreen.webkitRequestFullscreen();
+      }catch(e){}
+      // ensure presenter sees current slide
+      sendPresenterUpdate();
+      cancelAutoAdvance();
+      maybeScheduleAdvance();
+    });
+
+    // Presentation overlay interactions:
+    presentationScreen.addEventListener('click',(e)=>{
+      // single click -> next, double-click -> close
+      if(e.detail===2){
+        presentationScreen.style.display='none';
+        cancelAutoAdvance();
+        if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+        return;
+      }
+      presentNext();
+    });
+    // right-click / contextmenu -> previous slide (and prevent menu)
+    presentationScreen.addEventListener('contextmenu',e=>{ e.preventDefault(); presentPrev(); });
+
+    function toggleFullscreen(){
+      if(!document.fullscreenElement) {
+        // prefer presentation element if visible
+        const el = presentationScreen.style.display==='flex' ? presentationScreen : document.documentElement;
+        if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } else {
+        if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    // Apply slides button
+    applySlides.addEventListener('click',()=>{
+      const s = songs[currentIndex]; if(!s) return;
+      const raw = slidesRaw.value || '';
+      const parts = buildSlidesFromRaw(raw);
+      s._slides = parts.map(t=>({text:t,duration:8}));
+      renderSlidesEditor();
+      applyPresentationSlidesFromSong(s);
+    });
+
+    // Background save/clear
+    saveBgBtn.addEventListener('click',()=>{
+      const s = songs[currentIndex]; if(!s) return alert('Select a song first');
+      s.backgroundImage = bgImageInput.value || null;
+      s.backgroundVideo = bgVideoInput.value || null;
+      applyBackgroundForSong(s);
+      alert('Background saved to song object (not persisted to disk).');
+    });
+    clearBgBtn.addEventListener('click',()=>{
+      const s = songs[currentIndex]; if(!s) return; s.backgroundImage = null; s.backgroundVideo = null; bgImageInput.value=''; bgVideoInput.value=''; applyBackgroundForSong(s);
+    });
+
+  // Update scheduling when autoMode changes
+  autoMode.addEventListener('change',()=>{ cancelAutoAdvance(); maybeScheduleAdvance(); });
+
+    // Auto-advance scheduling
+    function maybeScheduleAdvance(){
+      const mode = autoMode.value;
+      if(mode==='manual') return;
+      const meta = presentationScreen.slideMeta || [];
+      const idx = presentationScreen.slideIndex || 0;
+      if(!meta[idx]) meta[idx] = {duration:8};
+      let dur = meta[idx].duration || 8;
+      if(mode==='syncAudio' && audio.duration){
+        // scale durations to match audio.duration
+        const total = (meta.reduce((a,b)=>a+(b.duration||8),0)) || (presentationScreen.slides.length||1);
+        const factor = audio.duration / total;
+        dur = (meta[idx].duration||8) * factor;
+      }
+      // schedule next
+      slideTimer = setTimeout(()=>{ presentNext(); }, Math.max(500, dur*1000));
+    }
+    function cancelAutoAdvance(){ if(slideTimer){ clearTimeout(slideTimer); slideTimer = null; } }
+
+    // Presenter window: open and sync via postMessage
+    presenterBtn.addEventListener('click',()=>{
+      if(presenterWindow && !presenterWindow.closed){ presenterWindow.focus(); return; }
+      const w = window.open('','presenter','width=900,height=600');
+      if(!w) return alert('Popup blocked — allow popups for this page to use Presenter View');
+      presenterWindow = w;
+        const lines = [
+          '<!doctype html>',
+          '<html>',
+          '<head>',
+          '<meta charset="utf-8">',
+          '<title>Presenter View</title>',
+          '<style>body{margin:0;background:#071226;color:#fff;font-family:Inter,Arial,Segoe UI} .wrap{display:flex;gap:8px;height:100vh;padding:12px} .panel{flex:1;background:rgba(255,255,255,0.02);padding:12px;border-radius:8px} .big{font-size:48px}</style>',
+          '</head>',
+          '<body>',
+          '<div class="wrap">',
+          '<div class="panel">',
+          '<div id="curr" class="big">—</div>',
+          '<div id="time" style="margin-top:12px;color:#9fb0c4">00:00</div>',
+          '</div>',
+          '<div class="panel">',
+          '<div style="font-size:20px;color:#9fb0c4">Next</div>',
+          '<div id="next" style="margin-top:8px;font-size:24px;color:#fff">—</div>',
+          '</div>',
+          '</div>',
+          '<script>',
+          'window.addEventListener("message", function(e){',
+          '  try{ var d = e.data; if(d.type === "update"){ document.getElementById("curr").textContent = d.current || ""; document.getElementById("next").textContent = d.next || ""; document.getElementById("time").textContent = d.time || ""; } }catch(err){}',
+          '});',
+          'if(window.opener){ window.opener.postMessage({type: "presenter-ready"}, "*"); }',
+          '<\/script>',
+          '</body>',
+          '</html>'
+        ];
+        w.document.write(lines.join('\n'));
+        w.document.close();
+      // Send initial state after small delay
+      setTimeout(()=>{ sendPresenterUpdate(); },200);
+    });
+
+    function sendPresenterUpdate(){
+      if(!presenterWindow || presenterWindow.closed) return;
+      const idx = presentationScreen.slideIndex || 0;
+      const slides = presentationScreen.slides||[];
+      const next = slides[idx+1] || '';
+      // compute remaining time if timer set
+      let time = '';
+      if(audio && !isNaN(audio.duration) && audio.duration>0){
+        const rem = Math.max(0, Math.floor(audio.duration - audio.currentTime));
+        const mm = String(Math.floor(rem/60)).padStart(2,'0'); const ss = String(rem%60).padStart(2,'0'); time = `${mm}:${ss}`;
+      }
+      presenterWindow.postMessage({type:'update', current: slides[idx]||'', next, time},'*');
+    }
+
+
+    // Tabs and search
+    document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',e=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const tab = t.dataset.tab;
+      document.getElementById('songView').style.display = tab==='songs' ? 'block' : 'none';
+      document.getElementById('bibleView').style.display = tab==='bible' ? 'block' : 'none';
+    }));
+    document.getElementById('globalSearch').addEventListener('input',e=>{ renderSongList(e.target.value); });
+
+    // Bible UI
+    const bookSelect = document.getElementById('bookSelect');
+    const chapterSelect = document.getElementById('chapterSelect');
+    const chapterArea = document.getElementById('chapterArea');
+    const verseSearch = document.getElementById('verseSearch');
+    const loadChapterBtn = document.getElementById('loadChapter');
+
+    function populateBooks(){
+      bookSelect.innerHTML='';
+      Object.keys(bible).forEach(book=>{
+        const opt = document.createElement('option'); opt.value=book; opt.textContent=book; bookSelect.appendChild(opt);
+      });
+      populateChapters();
+    }
+    function populateChapters(){
+      chapterSelect.innerHTML='';
+      const book = bookSelect.value; if(!book) return;
+      const chapters = Object.keys(bible[book]);
+      chapters.forEach(ch=>{ const opt = document.createElement('option'); opt.value=ch; opt.textContent=ch; chapterSelect.appendChild(opt); });
+    }
+    bookSelect.addEventListener('change',populateChapters);
+    loadChapterBtn.addEventListener('click',()=>{
+      const book = bookSelect.value; const ch = chapterSelect.value; if(!book||!ch) return;
+      const verses = bible[book][ch]; chapterArea.innerHTML='';
+      Object.keys(verses).forEach(vnum=>{
+        const div = document.createElement('div'); div.className='verse'; div.innerHTML = `<strong>${vnum}</strong> ${verses[vnum]}`;
+        chapterArea.appendChild(div);
+      });
+    });
+    verseSearch.addEventListener('input',()=>{
+      const q = verseSearch.value.toLowerCase(); Array.from(chapterArea.children).forEach(div=>{div.style.display = div.textContent.toLowerCase().includes(q)?'block':'none'});
+    });
+
+    // Try to load external bible file (optional)
+    (async function tryLoadBible(){
+      try{
+        const resp = await fetch('bible_kjv.json');
+        if(resp.ok){ bible = await resp.json(); console.log('Loaded external bible_kjv.json'); }
+      }catch(e){ console.log('No external bible file found — using sample'); }
+      populateBooks();
+    })();
+
+    // Init
+    renderSongList(); renderQueue();
+
+    // Keyboard: space to play/pause, arrow right/left for slides in presentation
+    window.addEventListener('keydown',e=>{
+      if(e.code==='Space'){ e.preventDefault(); if(audio.paused) audio.play(); else audio.pause(); }
+  // support both key values and physical keys for bracket navigation
+  if(e.key==='ArrowRight' || e.key===']' || e.code==='BracketRight'){ document.getElementById('slideNext').click(); }
+  if(e.key==='ArrowLeft' || e.key==='[' || e.code==='BracketLeft'){ document.getElementById('slidePrev').click(); }
+      if(e.key==='Escape'){ 
+        presentationScreen.style.display='none'; 
+        cancelAutoAdvance();
+        if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+      }
+      if(e.key==='p' || e.key==='P'){ presenterBtn.click(); }
+      if(e.key==='a' || e.key==='A'){ // cycle autoMode
+        const modes = ['manual','perSlide','syncAudio']; const idx = modes.indexOf(autoMode.value); autoMode.value = modes[(idx+1)%modes.length]; autoMode.dispatchEvent(new Event('change'));
+      }
+    });
+
+  </script>
+
+  <!--
+    NOTES for full offline setup:
+    1) Create a folder 'songs/audio' next to this HTML and put your MP3 files there.
+    2) Edit the 'songs' array at the top of the script to point to your files.
+    3) To include the entire KJV Bible offline, create 'bible_kjv.json' with the structure shown in the sample comment and place it next to this HTML.
+       Warning: the KJV text is ~4-6MB in JSON form; some browsers may take time to load the file.
+    4) If you want a separate songs.json, fetch it similarly and replace the local songs array.
+  -->
+
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EasyWorship — All-in-One (Hymns + KJV loader)</title>
+  <style>
+    :root{--bg:#0f1724;--panel:#0b1220;--accent:#ffd166;--muted:#94a3b8;}
+    *{box-sizing:border-box;font-family:Inter,Segoe UI,system-ui,Arial,sans-serif}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071226 0%, #071b2a 100%);color:#e6eef6}
+    header{display:flex;align-items:center;gap:16px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.04)}
+    header h1{font-size:18px;margin:0;color:var(--accent)}
+    .container{display:grid;grid-template-columns:320px 1fr 420px;gap:16px;padding:18px}
+    .panel{background:rgba(255,255,255,0.03);border-radius:12px;padding:12px}
+    .left{min-height:60vh}
+    .center{min-height:60vh}
+    .right{min-height:60vh}
+    .tabbar{display:flex;gap:8px;margin-bottom:12px}
+    .tab{padding:8px 12px;border-radius:8px;cursor:pointer;background:transparent;border:1px solid transparent}
+    .tab.active{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.06)}
+    input.search{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    ul.list{list-style:none;margin:0;padding:0;max-height:52vh;overflow:auto}
+    li.item{padding:10px;border-radius:8px;margin-bottom:8px;cursor:pointer}
+    li.item:hover{background:rgba(255,255,255,0.02)}
+    .meta{font-size:13px;color:var(--muted)}
+    .player{display:flex;flex-direction:column;gap:8px}
+    .player-controls{display:flex;align-items:center;gap:8px}
+    button.btn{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#062026;cursor:pointer}
+    .lyrics{white-space:pre-wrap;font-size:20px;line-height:1.5;padding:12px;border-radius:8px;}
+    .presentation{position:fixed;inset:0;background:#000;display:none;align-items:center;justify-content:center}
+    .presentation .slide{color:var(--accent);font-size:56px;padding:28px;text-align:center}
+    .bible-controls{display:flex;gap:8px;align-items:center}
+    select,button{background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px}
+    .verse{padding:8px;border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,0.01)}
+    footer{padding:12px;text-align:center;color:var(--muted)}
+    @media (max-width:1000px){.container{grid-template-columns:1fr;}.right{order:3}}
+    pre.small{font-size:12px;color:var(--muted);background:rgba(255,255,255,0.01);padding:8px;border-radius:8px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>EasyWorship — All-in-One</h1>
+    <div style="flex:1"></div>
+    <div style="font-size:13px;color:var(--muted)">Includes public-domain hymns. KJV loader (attempts online fetch, fallback to local file).</div>
+  </header>
+
+  <div class="container">
+    <aside class="panel left">
+      <div class="tabbar">
+        <div class="tab active" data-tab="songs">Songs</div>
+        <div class="tab" data-tab="bible">Bible</div>
+        <div class="tab" data-tab="presentation">Presentation</div>
+      </div>
+
+      <input class="search" id="globalSearch" placeholder="Search songs or Bible..." />
+      <h3 style="margin-top:12px">Songs</h3>
+      <ul id="songList" class="list"></ul>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0" />
+      <h3>Now Playing</h3>
+      <div id="nowPlaying" class="meta">—</div>
+
+      <div style="margin-top:12px">
+        <strong>Instructions</strong>
+        <p class="meta" style="font-size:13px">To add audio: place MP3s in <code>songs/audio/</code> (path used in songs[].audio). For offline KJV, place <code>bible_kjv.json</code> next to this HTML. If online KJV fetch fails due to CORS, download KJV text and run the convert script in the dev doc.</p>
+      </div>
+    </aside>
+
+    <main class="panel center">
+      <div id="songView">
+        <h2 id="songTitle">Select a song</h2>
+        <div class="meta" id="songAuthor"></div>
+        <div style="margin-top:12px" class="lyrics" id="lyricsArea">—</div>
+        <div style="margin-top:12px" class="player">
+          <audio id="audioPlayer" preload="none"></audio>
+          <div class="player-controls">
+            <button class="btn" id="prevBtn">Prev</button>
+            <button class="btn" id="playBtn">Play</button>
+            <button class="btn" id="nextBtn">Next</button>
+            <button class="btn" id="presentBtn">Presentation</button>
+            <input id="seek" type="range" min="0" max="100" value="0" style="flex:1" />
+            <input id="vol" type="range" min="0" max="1" step="0.01" value="1" style="width:100px" />
+          </div>
+        </div>
+      </div>
+
+      <div id="bibleView" style="display:none">
+        <h2>Bible (KJV)</h2>
+        <div class="bible-controls">
+          <select id="bookSelect"></select>
+          <select id="chapterSelect"></select>
+          <button id="loadChapter">Load</button>
+          <input id="verseSearch" placeholder="search within chapter" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)" />
+        </div>
+        <div id="chapterArea" style="margin-top:12px;max-height:50vh;overflow:auto"></div>
+      </div>
+    </main>
+
+    <aside class="panel right">
+      <h3>Queue</h3>
+      <ul id="queueList" class="list"></ul>
+
+      <h3 style="margin-top:12px">Presentation Controls</h3>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="slidePrev">Prev</button>
+        <button id="slideNext">Next</button>
+        <button id="toggleFull">Toggle Fullscreen</button>
+      </div>
+
+      <h3 style="margin-top:12px">Developer / Status</h3>
+      <pre id="statusArea" class="small">Status: initializing...</pre>
+
+      <h3 style="margin-top:12px">Notes</h3>
+      <pre class="small">- KJV is public domain; app attempts to fetch Project Gutenberg KJV text and convert it. - Replace placeholder audio paths with your MP3 files. - Use provided Python script to build bible_kjv.json if needed.</pre>
+    </aside>
+  </div>
+
+  <div class="presentation" id="presentationScreen"><div class="slide" id="presentationSlide"></div></div>
+  <footer>Made with ❤️ — Public-domain hymns included. Add your MP3s in songs/audio/.</footer>
+
+  <script>
+  /***********************
+   * Public-domain hymns (15 examples)
+   * Replace audio paths with your MP3s in songs/audio/
+   ***********************/
+  const songs = [
+    {id:'h1',title:'Amazing Grace',author:'John Newton',audio:'songs/audio/amazing_grace.mp3',lyrics:`Amazing grace! How sweet the sound\nThat saved a wretch like me.\nI once was lost, but now am found;`},
+    {id:'h2',title:'Holy, Holy, Holy',author:'Reginald Heber',audio:'songs/audio/holy_holy_holy.mp3',lyrics:`Holy, holy, holy! Lord God Almighty!\nEarly in the morning our song shall rise to Thee;`},
+    {id:'h3',title:'Rock of Ages',author:'Augustus M. Toplady',audio:'songs/audio/rock_of_ages.mp3',lyrics:`Rock of Ages, cleft for me,\nLet me hide myself in Thee;`},
+    {id:'h4',title:'Great Is Thy Faithfulness',author:'Thomas O. Chisholm',audio:'songs/audio/great_is_thy_faithfulness.mp3',lyrics:`Great is Thy faithfulness, O God my Father\nThere is no shadow of turning with Thee;`},
+    {id:'h5',title:'It Is Well With My Soul',author:'Horatio G. Spafford',audio:'songs/audio/it_is_well.mp3',lyrics:`When peace like a river attendeth my way,\nWhen sorrows like sea billows roll;`},
+    {id:'h6',title:'Be Thou My Vision',author:'Ancient Irish hymn',audio:'songs/audio/be_thou_my_vision.mp3',lyrics:`Be Thou my Vision, O Lord of my heart;\nNaught be all else to me, save that Thou art.`},
+    {id:'h7',title:'All Hail the Power',author:'Edward Perronet',audio:'songs/audio/all_hail_the_power.mp3',lyrics:`All hail the power of Jesus' name!\nLet angels prostrate fall;`},
+    {id:'h8',title:'Crown Him with Many Crowns',author:'Matthew Bridges',audio:'songs/audio/crown_him.mp3',lyrics:`Crown Him with many crowns,\nThe Lamb upon His throne;`},
+    {id:'h9',title:'Jesus Paid It All',author:'Elvina M. Hall',audio:'songs/audio/jesus_paid_it_all.mp3',lyrics:`I hear the Savior say, 'Thy strength indeed is small'\nChild of weakness, watch and pray.`},
+    {id:'h10',title:'To God Be the Glory',author:'Fanny Crosby',audio:'songs/audio/to_god_be_the_glory.mp3',lyrics:`To God be the glory, great things He hath done;\nSo loved He the world that He gave us His Son;`},
+    {id:'h11',title:'When I Survey the Wondrous Cross',author:'Isaac Watts',audio:'songs/audio/when_i_survey.mp3',lyrics:`When I survey the wondrous cross\nOn which the Prince of Glory died;`},
+    {id:'h12',title:'O For a Thousand Tongues to Sing',author:'Charles Wesley',audio:'songs/audio/o_for_a_thousand_tongues.mp3',lyrics:`O for a thousand tongues to sing\nMy great Redeemer's praise!`},
+    {id:'h13',title:'The Old Rugged Cross',author:'George Bennard',audio:'songs/audio/old_rugged_cross.mp3',lyrics:`On a hill far away stood an old rugged cross,\nThe emblem of suffering and shame;`},
+    {id:'h14',title:'Blessed Assurance',author:'Fanny J. Crosby',audio:'songs/audio/blessed_assurance.mp3',lyrics:`Blessed assurance, Jesus is mine!\nO what a foretaste of glory divine!`},
+    {id:'h15',title:'My Jesus, I Love Thee',author:'William R. Featherston',audio:'songs/audio/my_jesus_i_love_thee.mp3',lyrics:`My Jesus, I love Thee, I know Thou art mine;\nFor Thee all the follies of sin I resign.`}
+  ];
+
+  // small default bible structure (will be replaced when KJV loads)
+  let bible = {
+    "Genesis":{"1":{"1":"In the beginning God created the heaven and the earth."}},
+    "John":{"3":{"16":"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish..." }}
+  };
+
+  /***********************
+   * App UI wiring
+   ***********************/
+  const songListEl = document.getElementById('songList');
+  const songTitleEl = document.getElementById('songTitle');
+  const songAuthorEl = document.getElementById('songAuthor');
+  const lyricsArea = document.getElementById('lyricsArea');
+  const audio = document.getElementById('audioPlayer');
+  const nowPlaying = document.getElementById('nowPlaying');
+  const queueList = document.getElementById('queueList');
+  const playBtn = document.getElementById('playBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const seek = document.getElementById('seek');
+  const vol = document.getElementById('vol');
+  const presentBtn = document.getElementById('presentBtn');
+  const presentationScreen = document.getElementById('presentationScreen');
+  const presentationSlide = document.getElementById('presentationSlide');
+  const statusArea = document.getElementById('statusArea');
+
+  let currentIndex = -1;
+  let queue = [];
+
+  function logStatus(msg){ statusArea.textContent = 'Status: '+msg; console.log(msg); }
+
+  function renderSongList(filter=''){
+    songListEl.innerHTML = '';
+    const f = filter.toLowerCase();
+    songs.forEach((s,i)=>{
+      if(f && !(`${s.title} ${s.author} ${s.lyrics}`.toLowerCase().includes(f))) return;
+      const li = document.createElement('li'); li.className='item'; li.dataset.index=i;
+      li.innerHTML = `<strong>${s.title}</strong><div class='meta'>${s.author}</div>`;
+      li.onclick = ()=>{ playIndex(i); };
+      songListEl.appendChild(li);
+    });
+  }
+
+  function renderQueue(){
+    queueList.innerHTML='';
+    queue.forEach((idx,pos)=>{
+      const s = songs[idx];
+      const li = document.createElement('li'); li.className='item';
+      li.innerHTML = `<strong>${s.title}</strong><div class='meta'>${s.author}</div>`;
+      li.onclick = ()=>{ playIndex(idx); };
+      queueList.appendChild(li);
+    });
+  }
+
+  function playIndex(i){
+    const s = songs[i];
+    if(!s) return;
+    currentIndex = i;
+    audio.src = s.audio;
+    audio.load();
+    audio.play().catch(()=>{ logStatus('Audio play blocked or file missing — check songs/audio path'); });
+    songTitleEl.textContent = s.title;
+    songAuthorEl.textContent = s.author;
+    lyricsArea.textContent = s.lyrics || '—';
+    nowPlaying.textContent = `${s.title} — ${s.author}`;
+    updatePresentation(s.lyrics);
+  }
+
+  playBtn.addEventListener('click',()=>{ if(audio.paused) audio.play(); else audio.pause(); });
+  prevBtn.addEventListener('click',()=>{ if(currentIndex>0) playIndex(currentIndex-1); });
+  nextBtn.addEventListener('click',()=>{ if(currentIndex < songs.length-1) playIndex(currentIndex+1); });
+
+  audio.addEventListener('play',()=>{ playBtn.textContent='Pause'; });
+  audio.addEventListener('pause',()=>{ playBtn.textContent='Play'; });
+  audio.addEventListener('timeupdate',()=>{ if(audio.duration){ seek.max = Math.floor(audio.duration); seek.value = Math.floor(audio.currentTime); }});
+  seek.addEventListener('input',()=>{ audio.currentTime = seek.value; });
+  vol.addEventListener('input',()=>{ audio.volume = vol.value; });
+
+  function updatePresentation(text){
+    const slides = (text||'').split(/\n\n+/).map(s=>s.trim()).filter(Boolean);
+    presentationScreen.slides = slides;
+    presentationScreen.slideIndex = 0;
+    presentationSlide.textContent = slides[0] || '';
+  }
+
+  document.getElementById('slideNext').addEventListener('click',()=>{
+    const s = presentationScreen.slides||[]; if(!s.length) return;
+    presentationScreen.slideIndex = Math.min((presentationScreen.slideIndex||0)+1,s.length-1);
+    presentationSlide.textContent = s[presentationScreen.slideIndex];
+  });
+  document.getElementById('slidePrev').addEventListener('click',()=>{
+    const s = presentationScreen.slides||[]; if(!s.length) return;
+    presentationScreen.slideIndex = Math.max((presentationScreen.slideIndex||0)-1,0);
+    presentationSlide.textContent = s[presentationScreen.slideIndex];
+  });
+  document.getElementById('toggleFull').addEventListener('click',()=>{ toggleFullscreen(); });
+
+  presentBtn.addEventListener('click',()=>{ presentationScreen.style.display='flex'; });
+  presentationScreen.addEventListener('click',()=>{ presentationScreen.style.display='none'; });
+
+  function toggleFullscreen(){
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen().catch(()=>{});
+  }
+
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',e=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const tab = t.dataset.tab;
+    document.getElementById('songView').style.display = tab==='songs' ? 'block' : 'none';
+    document.getElementById('bibleView').style.display = tab==='bible' ? 'block' : 'none';
+  }));
+  document.getElementById('globalSearch').addEventListener('input',e=>{ renderSongList(e.target.value); });
+
+  // Bible UI
+  const bookSelect = document.getElementById('bookSelect');
+  const chapterSelect = document.getElementById('chapterSelect');
+  const chapterArea = document.getElementById('chapterArea');
+  const verseSearch = document.getElementById('verseSearch');
+  const loadChapterBtn = document.getElementById('loadChapter');
+
+  function populateBooks(){
+    bookSelect.innerHTML='';
+    Object.keys(bible).forEach(book=>{
+      const opt = document.createElement('option'); opt.value=book; opt.textContent=book; bookSelect.appendChild(opt);
+    });
+    populateChapters();
+  }
+  function populateChapters(){
+    chapterSelect.innerHTML='';
+    const book = bookSelect.value; if(!book) return;
+    const chapters = Object.keys(bible[book]);
+    chapters.forEach(ch=>{ const opt = document.createElement('option'); opt.value=ch; opt.textContent=ch; chapterSelect.appendChild(opt); });
+  }
+  bookSelect.addEventListener('change',populateChapters);
+  loadChapterBtn.addEventListener('click',()=>{
+    const book = bookSelect.value; const ch = chapterSelect.value; if(!book||!ch) return;
+    const verses = bible[book][ch]; chapterArea.innerHTML='';
+    Object.keys(verses).forEach(vnum=>{
+      const div = document.createElement('div'); div.className='verse'; div.innerHTML = `<strong>${vnum}</strong> ${verses[vnum]}`;
+      chapterArea.appendChild(div);
+    });
+  });
+  verseSearch.addEventListener('input',()=>{
+    const q = verseSearch.value.toLowerCase(); Array.from(chapterArea.children).forEach(div=>{div.style.display = div.textContent.toLowerCase().includes(q)?'block':'none'});
+  });
+
+  /***********************
+   * KJV loader logic
+   * Attempt 1: fetch plain text from Gutenberg (or openbible). If success, parse into bible object.
+   * Attempt 2: load local bible_kjv.json
+   ***********************/
+  async function tryLoadKJV(){
+    logStatus('Attempting to fetch KJV plain text (online)...');
+    // Known Gutenberg plain text URL for KJV (may change). We'll try a few common sources.
+    const candidates = [
+      'https://www.gutenberg.org/files/10/10-0.txt',
+      'https://www.gutenberg.org/cache/epub/10/pg10.txt',
+      'https://openbible.com/textfiles/kjv.txt',
+      'https://www.textfiles.com/bible/kjv.txt'
+    ];
+    for(const url of candidates){
+      try{
+        logStatus('Trying: ' + url);
+        const resp = await fetch(url);
+        if(!resp.ok){ logStatus(`No response/ok from ${url} (${resp.status})`); continue; }
+        const txt = await resp.text();
+        logStatus('Fetched plain text — parsing into JSON (this may take a few seconds)...');
+        const parsed = parseKJVPlainText(txt);
+        if(Object.keys(parsed).length>20){ bible = parsed; populateBooks(); logStatus('Loaded KJV from '+url); return; }
+      }catch(err){ logStatus('Fetch failed (CORS or network): '+ (err.message||err)); /* try next */ }
+    }
+
+    // Try local JSON fallback
+    try{
+      logStatus('Attempting to load local bible_kjv.json (place next to this HTML)...');
+      const r = await fetch('bible_kjv.json');
+      if(r.ok){ bible = await r.json(); populateBooks(); logStatus('Loaded local bible_kjv.json'); return; }
+      else logStatus('Local bible_kjv.json not found.');
+    }catch(e){ logStatus('Local JSON load failed: '+(e.message||e)); }
+
+    logStatus('KJV load failed — using sample. See developer resources in canvas to convert KJV text to bible_kjv.json.');
+  }
+
+  // naive parser for plain-text KJV formats that include lines like: "Genesis 1:1 In the beginning..."
+  function parseKJVPlainText(txt){
+    const books = {};
+    // Normalize line endings and split to lines
+    const lines = txt.replace(/\r/g,'').split('\n');
+    const verseLineRegex = /^([1-3]?\s?[A-Za-z]+)\s+(\d+):(\d+)\s+(.*)$/;
+    for(let i=0;i<lines.length;i++){
+      const line = lines[i].trim();
+      if(!line) continue;
+      const m = line.match(verseLineRegex);
+      if(m){
+        const book = m[1].trim();
+        const ch = m[2];
+        const v = m[3];
+        const verse = m[4].trim();
+        books[book] = books[book] || {};
+        books[book][ch] = books[book][ch] || {};
+        books[book][ch][v] = verse;
+      } else {
+        // some sources have lines like "Genesis 1:1-2 ..." or wrapped verses; try to salvage common patterns
+        // attempt to match lines that start with Book Chapter:VerseSpace...
+        const m2 = line.match(/^([1-3]?\s?[A-Za-z]+)\s+(\d+):(\d+)-(?:\d+)\s+(.*)$/);
+        if(m2){
+          const book = m2[1].trim(), ch=m2[2], v=m2[3], verse=m2[4].trim();
+          books[book] = books[book] || {}; books[book][ch]=books[book][ch]||{}; books[book][ch][v]=verse;
+        }
+      }
+    }
+    return books;
+  }
+
+  // initialize
+  renderSongList();
+  renderQueue();
+  tryLoadKJV();
+
+  // keyboard shortcuts
+  window.addEventListener('keydown',e=>{
+    if(e.code==='Space'){ e.preventDefault(); if(audio.paused) audio.play(); else audio.pause(); }
+    if(e.key==='ArrowRight'){ document.getElementById('slideNext').click(); }
+    if(e.key==='ArrowLeft'){ document.getElementById('slidePrev').click(); }
+    if(e.key==='Escape'){ presentationScreen.style.display='none'; }
+  });
+
+  </script>
+
+  <!-- Developer notes (short):
+       - If Gutenberg fetch fails due to CORS, download the KJV plain text (e.g. from Gutenberg) and run the Python convert_kjv_to_json.py
+         to produce bible_kjv.json, then place that file next to this HTML.
+       - Replace songs[*].audio paths with your MP3 filenames in songs/audio/.
+  -->
+</body>
+</html>

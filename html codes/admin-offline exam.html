@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Admin Panel</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #800000, #1b3b5f);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .login, .container {
+    max-width: 700px;
+    margin: 60px auto;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  }
+
+  h1 {
+    text-align: center;
+    color: #f4f4f4;
+  }
+
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 600;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 6px;
+  }
+
+  button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #2f6fa5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover { background: #3c8fd1; }
+
+  .question-list {
+    margin-top: 30px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  .question-item {
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding: 10px 0;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <h1>Admin Login</h1>
+  <input type="password" id="adminPass" placeholder="Enter password"><br><br>
+  <button onclick="checkPass()">Login</button>
+</div>
+
+<div class="container" id="adminPanel" style="display:none;">
+  <h1>Quiz Management</h1>
+
+  <label>Question:</label>
+  <textarea id="question" rows="2"></textarea>
+
+  <label>Choices:</label>
+  <input id="a" placeholder="Choice A">
+  <input id="b" placeholder="Choice B">
+  <input id="c" placeholder="Choice C">
+  <input id="d" placeholder="Choice D">
+
+  <label>Correct Answer (A/B/C/D):</label>
+  <input id="answer" maxlength="1">
+
+  <label>Explanation:</label>
+  <textarea id="explanation" rows="2"></textarea>
+
+  <button onclick="addQuestion()">Add Question</button>
+  <button onclick="clearQuestions()">Clear All Questions</button>
+
+  <div class="question-list" id="questionList"></div>
+</div>
+
+<script>
+const PASSWORD = "QGHSAdmin";
+
+function checkPass() {
+  const input = document.getElementById("adminPass").value;
+  if (input === PASSWORD) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    showQuestions();
+  } else {
+    alert("Incorrect password!");
+  }
+}
+
+function addQuestion() {
+  const q = document.getElementById("question").value.trim();
+  const a = document.getElementById("a").value.trim();
+  const b = document.getElementById("b").value.trim();
+  const c = document.getElementById("c").value.trim();
+  const d = document.getElementById("d").value.trim();
+  const answer = document.getElementById("answer").value.trim().toUpperCase();
+  const explanation = document.getElementById("explanation").value.trim();
+
+  if (!q || !a || !b || !c || !d || !answer || !explanation) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  let questions = JSON.parse(localStorage.getItem("quizData")) || [];
+  questions.push({ question: q, a, b, c, d, answer, explanation });
+  localStorage.setItem("quizData", JSON.stringify(questions));
+  alert("Question added!");
+  showQuestions();
+
+  document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+}
+
+function showQuestions() {
+  let questions = JSON.parse(localStorage.getItem("quizData")) || [];
+  const list = document.getElementById("questionList");
+  list.innerHTML = "<h3>Stored Questions:</h3>";
+  questions.forEach((q, i) => {
+    list.innerHTML += `
+      <div class="question-item">
+        <strong>${i+1}. ${q.question}</strong><br>
+        A) ${q.a}<br>
+        B) ${q.b}<br>
+        C) ${q.c}<br>
+        D) ${q.d}<br>
+        <em>Answer:</em> ${q.answer} <br>
+        <small>Explanation:</small> ${q.explanation}
+      </div>`;
+  });
+}
+
+function clearQuestions() {
+  if (confirm("Are you sure you want to delete all questions?")) {
+    localStorage.removeItem("quizData");
+    showQuestions();
+  }
+}
+</script>
+
+</body>
+</html>
