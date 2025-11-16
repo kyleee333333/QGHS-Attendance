@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EduQuest — Landing</title>
+
+<!-- Fonts & Icons (lightweight CDNs) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.css" rel="stylesheet">
+
+<style>
+  :root{
+    --maroon:#7a0b0b;
+    --maroon-2:#9b1010;
+    --sky:#2b6da3;
+    --glass: rgba(255,255,255,0.06);
+    --muted: rgba(255,255,255,0.75);
+    --bg-dark:#071427;
+    --card-bg: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-dark),#041225);font-family:Inter,system-ui,Arial;color:#fff;overflow:hidden}
+  /* Canvas behind everything */
+  canvas#bg{position:fixed;inset:0;z-index:0;display:block}
+
+  /* Preloader */
+  #preloader{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#050914,#071427)}
+  .loader{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .logo{width:86px;height:86px;border-radius:18px;background:linear-gradient(135deg,var(--maroon),var(--sky));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+  .loader small{color:var(--muted)}
+
+  /* Page content */
+  .shell{position:relative;z-index:10;max-width:1100px;margin:6vh auto;padding:28px;border-radius:16px;background:var(--card-bg);box-shadow:0 12px 50px rgba(2,6,23,0.7);backdrop-filter: blur(6px);display:grid;grid-template-columns:1fr 420px;gap:20px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .mark{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--maroon),var(--sky));display:flex;align-items:center;justify-content:center;font-weight:800}
+  .hero h1{margin:0;font-size:28px;letter-spacing:0.3px}
+  .hero p{margin:8px 0 18px;color:var(--muted)}
+  .actions{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{padding:12px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+  .btn-primary{background:var(--maroon);color:#fff;box-shadow:0 6px 18px rgba(122,11,11,0.18)}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+  /* right panel */
+  .panel{padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));height:100%}
+  .panel h3{margin:0 0 10px 0}
+  .meta{font-size:13px;color:var(--muted)}
+  .feature-list{margin-top:12px;display:grid;grid-template-columns:1fr;gap:10px}
+  .feature{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;gap:12px;align-items:start}
+  .feature .dot{width:8px;height:8px;border-radius:50%;background:var(--sky);margin-top:6px}
+
+  footer{position:fixed;left:0;right:0;bottom:14px;text-align:center;color:rgba(255,255,255,0.45);font-size:13px;z-index:12}
+
+  /* responsive */
+  @media(max-width:980px){.shell{grid-template-columns:1fr;padding:18px}.panel{order:2}}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div id="preloader">
+  <div class="loader" role="status" aria-live="polite">
+    <div class="logo">EQ</div>
+    <small>EduQuest • Preparing experience…</small>
+  </div>
+</div>
+
+<main class="shell" style="display:none" id="app">
+  <div>
+    <div class="brand">
+      <div class="mark">EQ</div>
+      <div>
+        <div style="font-weight:800;font-size:18px">EduQuest</div>
+        <div style="font-size:12px;color:var(--muted)">Offline classroom quiz system</div>
+      </div>
+    </div>
+
+    <section class="hero" style="margin-top:18px">
+      <h1>Polished offline quizzes — secure, simple, and modern</h1>
+      <p class="lead">Create quizzes, manage teacher profiles, and let students take exams with instant explanations and downloadable results — no server required.</p>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="to('student.html')">Start as Student</button>
+        <button class="btn btn-ghost" onclick="to('admin.html')">Open Admin Panel</button>
+      </div>
+    </section>
+
+    <section style="margin-top:22px">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="width:64px;height:48px;border-radius:8px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-weight:700">A+</div>
+        <div>
+          <div style="font-weight:700">Built for classrooms</div>
+          <div class="meta">Local storage, CSV export, multiple admin profiles, explanations after answering.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="panel">
+    <h3>Quick features</h3>
+    <div class="meta">Maroon • soft blue • glass UI</div>
+    <div class="feature-list">
+      <div class="feature"><div class="dot"></div><div><strong>Admin Profiles</strong><div class="meta">Personal passwords stored locally</div></div></div>
+      <div class="feature"><div class="dot" style="background:var(--maroon)"></div><div><strong>Student Records</strong><div class="meta">Name, grade, section, date — exportable</div></div></div>
+      <div class="feature"><div class="dot"></div><div><strong>Interactive background</strong><div class="meta">Pointer-tracked particles for depth</div></div></div>
+      <div class="feature"><div class="dot" style="background:var(--sky)"></div><div><strong>No server</strong><div class="meta">Everything in browser storage</div></div></div>
+    </div>
+  </aside>
+</main>
+
+<footer>© EduQuest • Made for classrooms</footer>
+
+<script>
+/* ---------- particle-ish interactive background (lightweight) ---------- */
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = innerWidth;
+let H = canvas.height = innerHeight;
+window.addEventListener('resize', ()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight;});
+let mouse = {x: W/2, y: H/2};
+addEventListener('mousemove', e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+
+let pts = [];
+const N = Math.min(120, Math.floor((W*H)/6000));
+for(let i=0;i<N;i++){
+  pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)/2,vy:(Math.random()-0.5)/2,r:1+Math.random()*2});
+}
+function frame(){
+  ctx.clearRect(0,0,W,H);
+  // slightly dark overlay for polish
+  const grd = ctx.createLinearGradient(0,0,W,H);
+  grd.addColorStop(0,'rgba(5,8,16,0.6)');
+  grd.addColorStop(1,'rgba(7,18,34,0.6)');
+  ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+
+  pts.forEach((p,i)=>{
+    // attraction to mouse
+    const dx = mouse.x - p.x; const dy = mouse.y - p.y;
+    const d = Math.sqrt(dx*dx+dy*dy)+0.001;
+    const f = Math.max(0, 140 - d) * 0.0008;
+    p.vx += (dx/d) * f;
+    p.vy += (dy/d) * f;
+    p.vx *= 0.96; p.vy *= 0.96;
+    p.x += p.vx; p.y += p.vy;
+    if(p.x < -30) p.x = W+30; if(p.x > W+30) p.x=-30;
+    if(p.y < -30) p.y = H+30; if(p.y > H+30) p.y=-30;
+
+    // draw
+    const depth = 1 - (p.y / H);
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(200,220,255,${0.06 + depth*0.4})`;
+    ctx.arc(p.x,p.y,p.r*(0.7 + depth*1.4),0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // light lines near mouse for spherical feel
+  for(let i=0;i<pts.length;i++){
+    for(let j=i+1;j<i+6 && j<pts.length;j++){
+      const a = pts[i], b = pts[j];
+      const dx = a.x - b.x; const dy = a.y - b.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if(dist < 120){
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(150,180,210,${0.05*(1-dist/120)})`;
+        ctx.lineWidth = 0.6;
+        ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(frame);
+}
+frame();
+
+/* ---------- preloader & reveal ---------- */
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    document.getElementById('preloader').style.transition='opacity 360ms ease';
+    document.getElementById('preloader').style.opacity=0;
+    setTimeout(()=>{document.getElementById('preloader').style.display='none'; document.getElementById('app').style.display='grid';},380);
+  },700);
+});
+
+/* ---------- navigation helper ---------- */
+function to(url){
+  document.body.style.transition='opacity 220ms ease';
+  document.body.style.opacity = 0;
+  setTimeout(()=> location.href = url, 200);
+}
+</script>
+</body>
+</html>

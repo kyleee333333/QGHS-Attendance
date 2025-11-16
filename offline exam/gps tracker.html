@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Live GPS Tracker</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+    <style>
+      #map { height: 100vh; width: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      // Default location before GPS updates
+      let lat = 14.123456;
+      let lng = 121.987654;
+
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 18,
+        center: { lat: lat, lng: lng },
+      });
+
+      const marker = new google.maps.Marker({
+        position: { lat: lat, lng: lng },
+        map: map,
+        title: "Current GPS Position"
+      });
+
+      // Simulate live GPS updates every 2 seconds
+      setInterval(() => {
+        // Replace this with your Serial-to-Web method
+        // Example: fetch from local server, WebSocket, or manual CSV
+        // For demonstration, adding small random movement:
+        lat += (Math.random() - 0.5) * 0.0001;
+        lng += (Math.random() - 0.5) * 0.0001;
+
+        const newPos = { lat: lat, lng: lng };
+        marker.setPosition(newPos);
+        map.panTo(newPos);
+      }, 2000);
+    </script>
+  </body>
+</html>
