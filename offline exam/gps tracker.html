@@ -1,43 +1,77 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Live GPS Tracker</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
-    <style>
-      #map { height: 100vh; width: 100%; }
-    </style>
-  </head>
-  <body>
-    <div id="map"></div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Live GPS Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #map {
+      flex: 1;
+    }
+    #dataBox {
+      padding: 12px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
 
-    <script>
-      // Default location before GPS updates
-      let lat = 14.123456;
-      let lng = 121.987654;
+<div id="dataBox">
+  <h3>Live GPS Coordinates</h3>
+  <p>Latitude: <span id="lat">Waiting...</span></p>
+  <p>Longitude: <span id="lng">Waiting...</span></p>
+</div>
 
-      const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 18,
-        center: { lat: lat, lng: lng },
-      });
+<div id="map"></div>
 
-      const marker = new google.maps.Marker({
-        position: { lat: lat, lng: lng },
-        map: map,
-        title: "Current GPS Position"
-      });
+<script>
+  // Replace with your Firebase Realtime Database URL
+  const databaseURL = "https://YOUR-PROJECT-ID.firebaseio.com/gps.json";
 
-      // Simulate live GPS updates every 2 seconds
-      setInterval(() => {
-        // Replace this with your Serial-to-Web method
-        // Example: fetch from local server, WebSocket, or manual CSV
-        // For demonstration, adding small random movement:
-        lat += (Math.random() - 0.5) * 0.0001;
-        lng += (Math.random() - 0.5) * 0.0001;
+  let map, marker;
 
-        const newPos = { lat: lat, lng: lng };
-        marker.setPosition(newPos);
-        map.panTo(newPos);
-      }, 2000);
-    </script>
-  </body>
+  function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 14.0, lng: 121.0 },
+      zoom: 15
+    });
+
+    marker = new google.maps.Marker({
+      position: { lat: 14.0, lng: 121.0 },
+      map: map,
+      title: "GPS Location"
+    });
+
+    listenForGPS();
+  }
+
+  function listenForGPS() {
+    setInterval(() => {
+      fetch(databaseURL)
+        .then(res => res.json())
+        .then(data => {
+          if (!data) return;
+          document.getElementById("lat").textContent = data.lat;
+          document.getElementById("lng").textContent = data.lng;
+
+          const pos = { lat: data.lat, lng: data.lng };
+          marker.setPosition(pos);
+          map.setCenter(pos);
+        });
+    }, 1500);
+  }
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF0SAUKSckNlmevYBRG3vaFw_w3uCixtw&callback=initMap" async defer></script>
+
+</body>
 </html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Monthsary</title>
+  <style>
+    :root{
+      --bg1:#ffdbe9; --bg2:#fff1f6; --accent:#ff6b9a; --paper:#fffaf6; --muted:#6b516b;
+      --sticker:#ffdde1;
+    }
+    html,body{height:100%;margin:0;font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif}
+    body{
+      background: radial-gradient(1200px 600px at 10% 10%, #fff6fb 0%, transparent 20%), linear-gradient(120deg,var(--bg1),var(--bg2));
+      animation: bgshift 14s ease-in-out infinite alternate;
+      display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);
+      padding:28px;
+    }
+    @keyframes bgshift{0%{filter: hue-rotate(-6deg);}100%{filter: hue-rotate(6deg);} }
+
+    /* Centered stage */
+    .stage{width:98%;max-width:820px;padding:28px;box-sizing:border-box;position:relative;text-align:center}
+
+    /* Cute headline */
+    h1.title{
+      font-size:46px;margin:0 0 8px 0;line-height:1.03;font-weight:700;color:var(--accent);
+      text-shadow: 0 6px 18px rgba(255,107,154,0.08);
+      display:inline-block;padding:6px 18px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.1));
+      transform: translateZ(0);
+    }
+    .title small{display:block;font-size:14px;color:rgba(0,0,0,0.35);font-weight:600}
+
+    .subtitle{color:rgba(0,0,0,0.45);font-size:14px;margin:10px 0 20px}
+
+    /* Paper letter centered */
+    .paper{
+      background:linear-gradient(180deg,var(--paper),#fff);box-shadow:0 20px 48px rgba(107,81,107,0.12);
+      border-radius:22px;padding:28px 30px;position:relative;overflow:visible;margin:0 auto;max-width:680px;text-align:center;
+      transition:transform 320ms ease;
+    }
+    .paper:hover{transform:translateY(-6px) rotate(-0.2deg)}
+
+    /* Sticker */
+    .sticker{width:86px;height:86px;border-radius:999px;background:linear-gradient(180deg,var(--sticker),#fff);display:inline-grid;place-items:center;margin:-56px auto 6px;border:6px solid rgba(255,255,255,0.6);box-shadow:0 10px 30px rgba(255,176,200,0.08)}
+    .sticker svg{width:44px;height:44px}
+
+    /* Typewriter intro centered */
+    .intro{font-size:18px;color:var(--muted);margin:6px 0 6px 0;min-height:56px}
+    .cursor{display:inline-block;width:3px;height:1.15em;background:var(--accent);margin-left:6px;vertical-align:bottom;animation: blink 800ms steps(1) infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    /* Letter body */
+    .letter{font-size:16px;line-height:1.7;color:#3a283a;margin-top:16px;opacity:0;transform:translateY(12px);transition:all 600ms cubic-bezier(.2,.9,.2,1)}
+    .letter.show{opacity:1;transform:translateY(0)}
+
+    /* Buttons centered */
+    .controls{margin-top:18px;display:inline-flex;gap:10px}
+    button.btn{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:14px;cursor:pointer;font-weight:700;box-shadow:0 10px 24px rgba(255,107,154,0.12);transform-origin:center}
+    button.btn.ghost{background:transparent;color:#3a283a;border:1px solid rgba(0,0,0,0.06)}
+    button.btn:active{transform:translateY(1px) scale(0.998)}
+    button#revealBtn{animation: pulse 2.2s infinite}
+    @keyframes pulse{0%{box-shadow:0 8px 20px rgba(255,107,154,0.08);transform:scale(1)}50%{box-shadow:0 14px 30px rgba(255,107,154,0.14);transform:scale(1.03)}100%{box-shadow:0 8px 20px rgba(255,107,154,0.08);transform:scale(1)}}
+
+    /* Floating hearts (smaller & softer) */
+    .hearts{position:absolute;inset:0;pointer-events:none}
+    .heart{position:absolute;font-size:18px;filter:drop-shadow(0 6px 12px rgba(255,107,154,0.08))}
+    @keyframes floatUp{0%{transform:translateY(0) scale(0.9);opacity:0.95}100%{transform:translateY(-120vh) scale(1.1);opacity:0}}
+
+    /* Confetti canvas overlay */
+    canvas.confetti{position:absolute;left:0;top:0;pointer-events:none;width:100%;height:100%}
+
+    /* responsive tweaks */
+    @media (max-width:560px){h1.title{font-size:32px}.paper{padding:18px;border-radius:16px}}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="hearts" id="hearts"></div>
+    <h1 class="title">Happy Monthsary — My Dearest <small>— you + me</small></h1>
+    <div class="subtitle">A little letter, a little magic, every day with you is my favorite day.</div>
+
+    <div class="sticker" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 21s-6.5-4.35-9-7.5C-0.9 8.7 5 3 12 8c7-5 12.9.7 9 5.5C18.5 16.65 12 21 12 21z" fill="#ff6b9a" opacity="0.95"/>
+        <g opacity="0.9"><circle cx="17.5" cy="6.5" r="1.8" fill="#ffd166"/></g>
+      </svg>
+    </div>
+
+    <div class="paper" id="paper">
+      <div class="intro" id="intro"></div>
+      <div class="letter" id="letter">
+        <p>My love,</p>
+        <p>Another month together and my heart keeps learning new ways to love you. You make small moments brilliant, and hard days soft. This monthsary I celebrate the way you laugh, the way you hold me close, and the quiet warmth of simply being with you.</p>
+        <p>I promise to cherish you with patience, to listen as you dream, and to keep choosing you — always. Thank you for being my sunshine, my best friend, and my home.</p>
+        <p>All my love,<br/><strong>[Your Name]</strong></p>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="revealBtn">Reveal Letter ❤️</button>
+        <button class="btn ghost" id="printBtn">Print / Save</button>
+        <button class="btn ghost" id="customizeBtn">Customize</button>
+      </div>
+    </div>
+    <canvas class="confetti" id="confetti"></canvas>
+  </div>
+
+  <script>
+    // Typewriter effect for intro
+    const introEl = document.getElementById('intro');
+    const revealBtn = document.getElementById('revealBtn');
+    const letterEl = document.getElementById('letter');
+    const confettiCanvas = document.getElementById('confetti');
+    const heartsContainer = document.getElementById('hearts');
+
+    const introText = "To the one who made my world brighter — a little note for our monthsary";
+    let i=0; function typeIntro(){
+      if(i<introText.length){
+        introEl.innerHTML += introText.charAt(i);
+        i++; setTimeout(typeIntro, 24 + Math.random()*26);
+      } else { introEl.innerHTML += '<span class="cursor"></span>'; }
+    }
+    typeIntro();
+
+    // Reveal button triggers letter show and confetti
+    revealBtn.addEventListener('click', ()=>{
+      letterEl.classList.add('show');
+      revealBtn.disabled = true; revealBtn.textContent = 'Celebration! 🎉';
+      burstConfetti();
+      spawnHearts(20);
+    });
+
+    // Print button
+    document.getElementById('printBtn').addEventListener('click', ()=>{
+      window.print();
+    });
+
+    // Customize - quick prompt for name
+    document.getElementById('customizeBtn').addEventListener('click', ()=>{
+      const name = prompt('Recipient name (will replace [Your Name]):','My Love');
+      if(name!==null) {
+        letterEl.querySelector('strong').textContent = name;
+      }
+    });
+
+    // Floating hearts generator (emoji style for cuteness)
+    function spawnHearts(n){
+      for(let k=0;k<n;k++){
+        const h=document.createElement('div'); h.className='heart';
+        h.textContent = ['💗','💖','💕','💝'][Math.floor(Math.random()*4)];
+        const size = 12 + Math.random()*26; h.style.fontSize = size+'px';
+        const left = 8 + Math.random()*84; h.style.left = left+'%';
+        h.style.bottom = (-10 - Math.random()*30)+'px';
+        h.style.opacity = 0.9 - Math.random()*0.35;
+        const dur = 6 + Math.random()*6; h.style.animation = `floatUp ${dur}s linear forwards`;
+        heartsContainer.appendChild(h);
+        setTimeout(()=>{ h.remove() }, (dur+0.6)*1000);
+      }
+    }
+
+    // Confetti simple implementation (softer colors)
+    function burstConfetti(){
+      const ctx = confettiCanvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      confettiCanvas.width = confettiCanvas.clientWidth * dpr;
+      confettiCanvas.height = confettiCanvas.clientHeight * dpr;
+      ctx.scale(dpr,dpr);
+
+      const W = confettiCanvas.clientWidth; const H = confettiCanvas.clientHeight;
+      const pieces = [];
+      const colors = ['#ffb3c6','#fff1a8','#bfe9ff','#e6d1ff','#ffccd9'];
+      for(let j=0;j<90;j++){
+        pieces.push({x: W/2 + (Math.random()-0.5)*260, y:H/2 + (Math.random()-0.5)*80, vx:(Math.random()-0.5)*6, vy:(-5 - Math.random()*5), r:3+Math.random()*6, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, vr: (Math.random()-0.5)*8});
+      }
+
+      let t0 = performance.now();
+      function frame(now){
+        const dt = (now - t0)/1000; t0 = now;
+        ctx.clearRect(0,0,W,H);
+        for(let p of pieces){
+          p.vy += 18*dt; p.x += p.vx; p.y += p.vy; p.rot += p.vr*dt;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*1.4);
+          ctx.restore();
+        }
+        if(pieces.some(p=>p.y < H+60)) requestAnimationFrame(frame);
+        else setTimeout(()=>ctx.clearRect(0,0,W,H), 300);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // gentle background hearts
+    setInterval(()=>{ spawnHearts(1 + Math.round(Math.random()*1)); }, 1200);
+
+    // Ensure canvas resizes on window change
+    window.addEventListener('resize', ()=>{
+      confettiCanvas.width = confettiCanvas.clientWidth; confettiCanvas.height = confettiCanvas.clientHeight;
+    });
+  </script>
+</body>
+</html>

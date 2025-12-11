@@ -1,0 +1,22 @@
+:root{--bg:#f7f9fc;--accent:#2b6df6;--muted:#666}
+*{box-sizing:border-box;font-family:Segoe UI,Arial,Helvetica,sans-serif}
+body{margin:0;background:var(--bg);color:#222}
+.container{max-width:900px;margin:0 auto;padding:18px}
+.site-header{background:#fff;border-bottom:1px solid #e6e9ef}
+.site-header .container{display:flex;align-items:center;gap:16px}
+.site-header h1{font-size:20px;margin:12px 0}
+.site-header nav{margin-left:auto}
+.site-header a{margin-left:12px;color:var(--accent);text-decoration:none}
+.hero{background:#fff;padding:24px;border-radius:8px;margin-top:18px}
+.tag{color:var(--muted)}
+.features{display:flex;gap:12px;margin-top:18px}
+.features article{background:#fff;padding:12px;border-radius:8px;flex:1}
+.btn{display:inline-block;padding:8px 12px;background:var(--accent);color:#fff;border-radius:6px;text-decoration:none}
+.subject-list{list-style:none;padding:0}
+.subject-list li{background:#fff;margin:10px 0;padding:12px;border-radius:6px}
+.site-footer{margin-top:28px;padding:12px;color:var(--muted)}
+.q{font-weight:600;margin-top:12px}
+.result{font-weight:700;margin-top:12px}
+button{padding:8px 12px}
+label{display:block;margin:6px 0}
+@media(max-width:640px){.features{flex-direction:column}}

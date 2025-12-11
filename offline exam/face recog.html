@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Detection</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+</head>
+<body>
+
+<h2>Face Detection with Laptop Camera</h2>
+
+<video id="video" width="640" height="480" autoplay muted></video>
+<canvas id="canvas" width="640" height="480"></canvas>
+
+<script>
+    const video = document.getElementById("video");
+
+    // Start camera
+    async function startCamera() {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        video.srcObject = stream;
+    }
+
+    // Load face detection models
+    Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri("https://cdn.jsdelivr.net/npm/face-api.js/models"),
+    ]).then(startCamera);
+
+    // Detect face every frame
+    video.addEventListener("play", () => {
+        const canvas = document.getElementById("canvas");
+        const display = faceapi.createCanvasFromMedia(video);
+        document.body.append(display);
+
+        const size = { width: video.width, height: video.height };
+        faceapi.matchDimensions(canvas, size);
+
+        setInterval(async () => {
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
+
+            canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
+            const resized = faceapi.resizeResults(detections, size);
+            faceapi.draw.drawDetections(canvas, resized);
+
+        }, 100);
+    });
+</script>
+
+</body>
+</html>

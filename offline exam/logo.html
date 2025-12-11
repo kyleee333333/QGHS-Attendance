@@ -1,0 +1,64 @@
+<header>
+    <h1 id="logo">QUIRINO GENERAL HIGH SCHOOL</h1>
+    <p id="subtitle">Online Enrollment</p>
+</header>
+
+<style>
+/* Header colors */
+header {
+    background-color: #800000; /* Maroon */
+    color: white;
+    padding: 40px 10px;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Logo Animation */
+#logo {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.8);
+    animation: logoAnim 1.5s ease-out forwards;
+    font-size: 28px;
+    letter-spacing: 2px;
+}
+
+#subtitle {
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: subtitleAnim 1.5s ease-out forwards;
+    animation-delay: 1s;
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+/* Keyframes for Logo */
+@keyframes logoAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.8);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(10px) scale(1.1);
+    }
+    80% {
+        transform: translateY(-5px) scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Keyframes for Subtitle */
+@keyframes subtitleAnim {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>

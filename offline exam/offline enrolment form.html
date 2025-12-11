@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quirino General High School - Enrollment</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+header {
+    background-color: #800000; /* Maroon */
+    color: white;
+    padding: 40px 10px;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Logo Animation */
+#logo {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.8);
+    animation: logoAnim 1.5s ease-out forwards;
+    font-size: 28px;
+    letter-spacing: 2px;
+}
+
+#subtitle {
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: subtitleAnim 1.5s ease-out forwards;
+    animation-delay: 1s;
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+/* Keyframes */
+@keyframes logoAnim {
+    0% { opacity: 0; transform: translateY(-50px) scale(0.8); }
+    60% { opacity: 1; transform: translateY(10px) scale(1.1); }
+    80% { transform: translateY(-5px) scale(1); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes subtitleAnim {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Container */
+.container {
+    max-width: 700px;
+    margin: 20px auto;
+    background-color: white;
+    padding: 20px 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+h2 { text-align: center; color: #800000; font-size: 22px; margin-bottom: 15px; }
+h3 { color: #800000; margin-top: 20px; }
+
+form label { display: block; margin-top: 12px; font-weight: bold; font-size: 14px; }
+form input, form select, form textarea { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+form textarea { resize: vertical; }
+form button { margin-top: 20px; background-color: #800000; color: white; padding: 12px; width: 100%; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+form button:hover { background-color: #a00000; }
+
+@media (max-width: 480px) {
+    header h1 { font-size: 22px; }
+    header p { font-size: 14px; }
+    .container { padding: 15px 10px; margin: 15px; }
+    h2 { font-size: 18px; }
+    form input, form select, form textarea { font-size: 13px; padding: 8px; }
+    form label { font-size: 13px; }
+    form button { font-size: 15px; padding: 10px; }
+}
+
+#formSection { display: none; }
+</style>
+</head>
+<body>
+<header>
+    <h1 id="logo">QUIRINO GENERAL HIGH SCHOOL</h1>
+    <p id="subtitle">Online Enrollment</p>
+</header>
+
+<div class="container">
+
+    <h2>Step 1: Select Student Type</h2>
+    <form id="typeForm">
+        <label for="studentType">Choose your student type:</label>
+        <select id="studentType" required>
+            <option value="" disabled selected>Select type</option>
+            <option value="junior">Junior High School (Grades 7-10)</option>
+            <option value="senior">Senior High School (Grades 11-12)</option>
+        </select>
+        <button type="submit">Next</button>
+    </form>
+
+    <div id="formSection">
+        <h2>Enrollment Form</h2>
+        <form id="enrollForm">
+            <!-- GENERAL INFORMATION -->
+            <h3>General Information</h3>
+            <label for="studentName">Full Name:</label>
+            <input type="text" id="studentName" name="studentName" placeholder="Enter full name" required>
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" required>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="" disabled selected>Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+
+            <label for="nationality">Nationality:</label>
+            <input type="text" id="nationality" name="nationality" placeholder="Enter nationality" required>
+
+            <label for="contact">Contact Number:</label>
+            <input type="text" id="contact" name="contact" placeholder="Enter contact number" required>
+
+            <label for="email">Email Address (Optional):</label>
+            <input type="email" id="email" name="email" placeholder="Enter email address">
+
+            <!-- LIVE LOCATION -->
+            <h3>Location</h3>
+            <label for="location">Enter your address:</label>
+            <input type="text" id="location" placeholder="Type your address" required>
+
+            <label for="street">Street / House No.:</label>
+            <input type="text" id="street" name="street" placeholder="Enter street or house number" required>
+
+            <!-- JUNIOR HIGH SCHOOL -->
+            <div id="juniorSection">
+                <h3>Junior High School (Grades 7-10)</h3>
+                <label for="jhsGrade">Grade Level:</label>
+                <select id="jhsGrade" name="jhsGrade">
+                    <option value="" disabled selected>Select grade</option>
+                    <option value="7">Grade 7</option>
+                    <option value="8">Grade 8</option>
+                    <option value="9">Grade 9</option>
+                    <option value="10">Grade 10</option>
+                </select>
+
+                <label for="lastSchoolJH">Last School Attended:</label>
+                <input type="text" id="lastSchoolJH" name="lastSchoolJH" placeholder="Enter last school">
+
+                <label for="adviserJH">Adviser/Teacher Name:</label>
+                <input type="text" id="adviserJH" name="adviserJH" placeholder="Enter teacher name">
+            </div>
+
+            <!-- SENIOR HIGH SCHOOL -->
+            <div id="seniorSection">
+                <h3>Senior High School (Grades 11-12)</h3>
+                <label for="shsGrade">Grade Level:</label>
+                <select id="shsGrade" name="shsGrade">
+                    <option value="" disabled selected>Select grade</option>
+                    <option value="11">Grade 11</option>
+                    <option value="12">Grade 12</option>
+                </select>
+
+                <label for="strand">Strand / Track:</label>
+                <select id="strand" name="strand">
+                    <option value="" disabled selected>Select strand</option>
+                    <option value="STEM">STEM</option>
+                    <option value="ABM">ABM</option>
+                    <option value="HUMSS">HUMSS</option>
+                    <option value="GAS">GAS</option>
+                    <option value="TVL">TVL</option>
+                </select>
+
+                <label for="lastSchoolSH">Last School Attended:</label>
+                <input type="text" id="lastSchoolSH" name="lastSchoolSH" placeholder="Enter last school">
+
+                <label for="adviserSH">Adviser/Teacher Name:</label>
+                <input type="text" id="adviserSH" name="adviserSH" placeholder="Enter teacher name">
+            </div>
+
+            <label for="remarks">Remarks (Optional):</label>
+            <textarea id="remarks" name="remarks" rows="2" placeholder="Any additional information"></textarea>
+
+            <button type="submit">Submit Enrollment</button>
+        </form>
+    </div>
+</div>
+
+<!-- Google Places API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&libraries=places"></script>
+<script>
+// Step 1: Select student type
+const typeForm = document.getElementById('typeForm');
+const formSection = document.getElementById('formSection');
+const juniorSection = document.getElementById('juniorSection');
+const seniorSection = document.getElementById('seniorSection');
+
+typeForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const type = document.getElementById('studentType').value;
+    formSection.style.display = 'block';
+    if(type === 'junior'){
+        juniorSection.style.display = 'block';
+        seniorSection.style.display = 'none';
+    } else {
+        juniorSection.style.display = 'none';
+        seniorSection.style.display = 'block';
+    }
+    window.scrollTo(0, formSection.offsetTop);
+});
+
+// Google Places Autocomplete
+const input = document.getElementById('location');
+const autocomplete = new google.maps.places.Autocomplete(input, {
+    types: ['geocode'], // addresses only
+});
+
+// Submit form (currently just alert)
+document.getElementById('enrollForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    alert("Enrollment submitted successfully!");
+});
+</script>
+</body>
+</html>

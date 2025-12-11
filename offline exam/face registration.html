@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Face</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+</head>
+
+<body>
+<h2>Register Your Face</h2>
+
+<video id="video" width="480" height="360" autoplay muted></video>
+<button id="captureBtn">Save Face</button>
+
+<script>
+// Start camera
+async function startCamera() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    document.getElementById("video").srcObject = stream;
+}
+
+// Load models
+Promise.all([
+    faceapi.nets.faceRecognitionNet.loadFromUri("https://cdn.jsdelivr.net/npm/face-api.js/models"),
+    faceapi.nets.faceLandmark68Net.loadFromUri("https://cdn.jsdelivr.net/npm/face-api.js/models"),
+    faceapi.nets.tinyFaceDetector.loadFromUri("https://cdn.jsdelivr.net/npm/face-api.js/models")
+]).then(startCamera);
+
+// Save face descriptor
+document.getElementById("captureBtn").onclick = async function () {
+    const video = document.getElementById("video");
+
+    const detections = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+    if (!detections) {
+        alert("No face detected. Try again.");
+        return;
+    }
+
+    // Save descriptor to local storage
+    localStorage.setItem("saved_face", JSON.stringify(detections.descriptor));
+    alert("Face registered successfully!");
+};
+</script>
+
+</body>
+</html>

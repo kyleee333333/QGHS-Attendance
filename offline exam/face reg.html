@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Register & Login</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f0f2f5;
+    margin: 0;
+}
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 350px;
+}
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+video {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+}
+button {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 5px;
+}
+button:hover {
+    background: #45a049;
+}
+#status {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #555;
+}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+<script>
+let video = null;
+
+async function setupCamera() {
+    video = document.getElementById('video');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+    video.srcObject = stream;
+    return new Promise((resolve) => {
+        video.onloadedmetadata = () => resolve(video);
+    });
+}
+
+async function loadModels() {
+    await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+}
+
+async function registerFace() {
+    const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+    const status = document.getElementById('status');
+    if (!detections) {
+        status.innerText = "No face detected. Try again!";
+        return;
+    }
+    localStorage.setItem('faceDescriptor', JSON.stringify(detections.descriptor));
+    status.innerText = "Face registered successfully!";
+}
+
+async function loginFace() {
+    const status = document.getElementById('status');
+    const storedDescriptor = JSON.parse(localStorage.getItem('faceDescriptor'));
+    if (!storedDescriptor) {
+        status.innerText = "No face registered!";
+        return;
+    }
+    const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+    if (!detections) {
+        status.innerText = "No face detected!";
+        return;
+    }
+    const distance = faceapi.euclideanDistance(detections.descriptor, storedDescriptor);
+    if (distance < 0.6) {
+        status.innerText = "Login successful!";
+    } else {
+        status.innerText = "Face not recognized!";
+    }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    await loadModels();
+    await setupCamera();
+});
+</script>
+</head>
+<body>
+<div class="container">
+    <h1>Face Register & Login</h1>
+    <video id="video" autoplay muted></video>
+    <div>
+        <button onclick="registerFace()">Register Face</button>
+        <button onclick="loginFace()">Login</button>
+    </div>
+    <div id="status">Waiting for action...</div>
+</div>
+</body>
+</html>

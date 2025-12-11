@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Floating Circle Animation — Fixed</title>
+<style>
+  /* Page reset */
+  html,body { height:100%; margin:0; padding:0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    overflow:hidden;
+    background: linear-gradient(120deg, #071224 0%, #0f2a4a 40%, #2a4a6b 100%);
+    color: #fff;
+  }
+
+  /* Make canvas cover the screen */
+  #canvas {
+    position: fixed;
+    inset: 0;               /* top:0; right:0; bottom:0; left:0; */
+    display:block;
+    width:100%;
+    height:100%;
+    z-index:0;
+    pointer-events: none;   /* allows interacting with other elements if you add any */
+    background: transparent;
+  }
+
+  /* Centered UI on top of canvas */
+  .ui {
+    position: absolute;
+    z-index: 2;
+    left:50%;
+    top:50%;
+    transform: translate(-50%,-50%);
+    text-align:center;
+    user-select:none;
+    padding: 18px 28px;
+    border-radius: 14px;
+    backdrop-filter: blur(6px) saturate(120%);
+    background: rgba(255,255,255,0.03);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.5);
+  }
+
+  .title {
+    font-size: clamp(20px, 4vw, 40px);
+    letter-spacing: 0.08em;
+    margin: 0 0 8px 0;
+    color: #fff;
+    text-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  }
+
+  .subtitle {
+    opacity: 0.85;
+    font-size: 14px;
+    margin:0;
+  }
+
+  /* Small message area for debug instructions when canvas fails */
+  #fallback {
+    position: absolute;
+    left:12px;
+    bottom:12px;
+    z-index:3;
+    font-size:12px;
+    opacity:0.9;
+    background: rgba(0,0,0,0.25);
+    padding:6px 10px;
+    border-radius:8px;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas" aria-hidden="true"></canvas>
+
+<div class="ui" role="region" aria-label="Animation title">
+  <h1 class="title">Floating Circle Animation</h1>
+  <p class="subtitle">Smooth canvas animation • Resize and retina ready</p>
+</div>
+
+<div id="fallback" aria-hidden="true">If you see a blank page: open DevTools (F12) → Console for errors.</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('canvas');
+
+  // Safety check
+  if (!canvas) {
+    console.error('Canvas element not found.');
+    document.getElementById('fallback').textContent = 'Canvas element not found.';
+    return;
+  }
+
+  const ctx = canvas.getContext && canvas.getContext('2d');
+  if (!ctx) {
+    console.error('2D context not supported by this browser.');
+    document.getElementById('fallback').textContent = '2D context not supported.';
+    return;
+  }
+
+  // Device pixel ratio support (for crisp rendering on retina screens)
+  let DPR = Math.max(window.devicePixelRatio || 1, 1);
+
+  function resizeCanvas() {
+    DPR = Math.max(window.devicePixelRatio || 1, 1);
+    const w = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const h = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    canvas.width = Math.round(w * DPR);
+    canvas.height = Math.round(h * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0); // scale drawing operations
+  }
+
+  // Circle factory
+  function createCircle(width, height) {
+    const r = Math.random() * 12 + 3; // radius
+    return {
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r,
+      dx: (Math.random() - 0.5) * (0.4 + Math.random() * 1.2),
+      dy: (Math.random() - 0.5) * (0.4 + Math.random() * 1.2),
+      opacity: 0.12 + Math.random() * 0.6,
+      hue: Math.floor(180 + Math.random() * 140) // color hue
+    };
+  }
+
+  // Create and manage circle pool
+  let circles = [];
+  function rebuildCircles() {
+    const width = canvas.clientWidth || window.innerWidth;
+    const height = canvas.clientHeight || window.innerHeight;
+    const count = Math.round(Math.max(24, (width * height) / (1600 * 0.8))); // density scale
+    circles = new Array(count).fill(0).map(() => createCircle(width, height));
+    console.info('Circles:', circles.length);
+  }
+
+  // Drawing function for each circle
+  function drawCircle(c) {
+    // Glow gradient per circle
+    const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 4);
+    g.addColorStop(0, `hsla(${c.hue}, 90%, 70%, ${c.opacity})`);
+    g.addColorStop(0.35, `hsla(${c.hue}, 80%, 60%, ${c.opacity * 0.55})`);
+    g.addColorStop(1, `hsla(${c.hue}, 60%, 40%, 0)`);
+
+    ctx.beginPath();
+    ctx.fillStyle = g;
+    ctx.arc(c.x, c.y, c.r * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // core circle
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${c.hue}, 85%, 85%, ${Math.min(1, c.opacity + 0.18)})`;
+    ctx.shadowColor = `hsla(${c.hue}, 90%, 60%, ${Math.min(0.85, c.opacity * 1.2)})`;
+    ctx.shadowBlur = c.r * 4;
+    ctx.fill();
+
+    // reset shadow so it does not leak
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
+  }
+
+  // Animation loop
+  let last = performance.now();
+  function animate(now) {
+    const dt = (now - last) / 1000; // seconds
+    last = now;
+
+    // gentle background clear with slight alpha for trailing
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // draw soft vignette background (optional subtle effect)
+    ctx.save();
+    const w = canvas.clientWidth || window.innerWidth;
+    const h = canvas.clientHeight || window.innerHeight;
+    const vg = ctx.createLinearGradient(0, 0, w, h);
+    vg.addColorStop(0, 'rgba(10,18,30,0.12)');
+    vg.addColorStop(1, 'rgba(20,40,60,0.12)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, w, h);
+    ctx.restore();
+
+    // Move and draw circles
+    for (let i = 0; i < circles.length; i++) {
+      const c = circles[i];
+      c.x += c.dx * (0.6 + dt * 60 * 0.12); // movement scaled by delta/time
+      c.y += c.dy * (0.6 + dt * 60 * 0.12);
+
+      // wrap-around (gives continuous motion)
+      if (c.x < -c.r * 8) c.x = w + c.r * 8;
+      if (c.x > w + c.r * 8) c.x = -c.r * 8;
+      if (c.y < -c.r * 8) c.y = h + c.r * 8;
+      if (c.y > h + c.r * 8) c.y = -c.r * 8;
+
+      drawCircle(c);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  // Initialize
+  function start() {
+    try {
+      resizeCanvas();
+      rebuildCircles();
+      last = performance.now();
+      requestAnimationFrame(animate);
+      console.info('Animation started');
+    } catch (err) {
+      console.error('Animation error:', err);
+      document.getElementById('fallback').textContent = 'Animation error — check console.';
+    }
+  }
+
+  // Resize handling (debounced)
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      resizeCanvas();
+      rebuildCircles();
+    }, 120);
+  });
+
+  // Start after DOM loaded
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    start();
+  } else {
+    window.addEventListener('DOMContentLoaded', start);
+  }
+
+})();
+</script>
+
+</body>
+</html>
