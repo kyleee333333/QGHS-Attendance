@@ -1,0 +1,10 @@
+{
+  "name": "qghs-connect-r307-fingerprint",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QGHS CONNECT attendance demo with a planned R307 serial bridge",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "cors": "^2.8.5", "dotenv": "^16.4.7", "express": "^4.21.2" }
+}
