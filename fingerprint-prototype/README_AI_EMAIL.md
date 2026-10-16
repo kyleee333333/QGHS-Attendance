@@ -1,0 +1,3 @@
+# Optional email notifications
+
+Email alerts are not enabled in the demo. To add them, use a trusted email provider and configure credentials only as server-side environment variables. Never expose SMTP credentials or API keys in browser JavaScript or commit them to GitHub. Send only necessary attendance information and test with approved accounts first. Email features require provider setup and school authorization.
