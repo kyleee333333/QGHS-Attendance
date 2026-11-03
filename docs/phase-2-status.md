@@ -49,3 +49,21 @@ The school must approve the data-processing purpose, privacy notice, retention/d
 - Physical terminal attendance ingestion is not yet wired to the email queue helper, so end-to-end automatic notifications are not active.
 - Absence-alert cutoff scheduling, email-address verification workflow, persistent distributed login throttling, session revocation, worker leasing/transactional claiming, and automated integration tests remain outstanding.
 - Do not load real student or guardian data until QGHS authorizes the privacy, access, retention, and operational controls.
+
+
+## Student identity and fingerprint display added
+
+- Added the student identification card to the student portal profile, displaying the student's name and LRN with a portrait when an approved photo is available.
+- Added `Students.LRN` and `Students.PhotoFileName` to the initial schema, plus the one-time upgrade script `database/schema/002_student_identity_fields.sql` for existing databases.
+- Added an authenticated student-photo endpoint. Photo files must be stored outside the public web root in the private folder configured by `STUDENT_PHOTO_DIR`; only the linked student can retrieve their own photo.
+- Added a fingerprint attendance display page with ready, success, and scan-failure states. It provides retry guidance for sweaty/wet fingers and routes missing or unreadable prints to authorized staff for identity verification.
+- The attendance display is a UI component only. It is **not yet connected** to ESP32/R307 firmware or a terminal attendance API. A controller must call the documented display bridge only after the API confirms a saved attendance event.
+- A failed scan must never create an attendance event. LRN-only attendance and automatic kiosk re-enrollment are not allowed. The display returns to a neutral screen after eight seconds to limit LRN exposure.
+
+### Remaining setup and verification
+
+- Apply the schema upgrade to an existing Access database, or create a new database from the updated initial schema.
+- Configure the private student photo directory and populate approved photo filenames through an authorized staff workflow.
+- Build and test the API and portal; verify that photo access is limited to the authenticated student's own record.
+- Integrate the attendance display with the actual terminal controller and server-side event confirmation.
+- Test wet-finger, unreadable/worn print, missing enrollment, scanner disconnect, duplicate scan, and staff-assisted verification scenarios before school use.
