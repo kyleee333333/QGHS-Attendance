@@ -3,6 +3,7 @@ import { z } from "zod";
 import { openAccessConnection } from "../db/connection.js";
 import { verifyPassword } from "../auth/passwords.js";
 import { issueAccessToken,type PortalRole } from "../auth/tokens.js";
+import { env } from "../config/env.js";
 const router=Router();
 const attempts=new Map<string,{count:number;until:number}>();
 const schema=z.object({username:z.string().trim().min(1).max(80),password:z.string().min(1).max(200)});
@@ -24,7 +25,7 @@ router.post("/login",async(req,res)=>{
   const allowed=roles.map(r=>r.RoleCode.toLowerCase()).filter(r=>["student","parent","staff","admin"].includes(r));
   if(allowed.length!==1){res.status(401).json({error:{code:"INVALID_CREDENTIALS",message:"Username or password is incorrect."}});return;}
   attempts.delete(key);
-  res.json({accessToken:issueAccessToken(user.UserID,allowed[0] as PortalRole),tokenType:"Bearer",expiresIn:900});
+  res.json({accessToken:issueAccessToken(user.UserID,allowed[0] as PortalRole),tokenType:"Bearer",expiresIn:env.JWT_ACCESS_TTL_SECONDS});
  }catch(error){console.error("Sign-in database error",error);res.status(503).json({error:{code:"AUTH_UNAVAILABLE",message:"Sign-in is temporarily unavailable."}});}
  finally{if(db)await db.close();}
 });
