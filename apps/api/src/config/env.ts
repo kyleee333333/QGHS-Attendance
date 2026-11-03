@@ -8,7 +8,14 @@ const envSchema = z.object({
   API_CORS_ORIGINS: z.string().default("http://localhost:5173,http://localhost:8081"),
   ACCESS_DB_PATH: z.string().optional(),
   ACCESS_ODBC_DRIVER: z.string().default("Microsoft Access Driver (*.mdb, *.accdb)"),
-  ACCESS_DB_PASSWORD: z.string().optional()
+  ACCESS_DB_PASSWORD: z.string().optional(),
+  JWT_ACCESS_SECRET: z.string().min(32).optional(),
+  JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().min(300).max(3600).default(900),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  SMTP_FROM: z.string().default("QGHS CONNECT <noreply@example.test>")
 });
 
 const parsed = envSchema.safeParse(process.env);
