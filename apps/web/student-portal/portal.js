@@ -22,13 +22,7 @@ async function loadPortal() {
   byId("login-view").hidden = true; byId("portal-view").hidden = false;
   const rows = await api("/api/portal/attendance");
   byId("attendance-rows").innerHTML = rows.events.length ? rows.events.map(event => `<tr><td>${escapeHtml(event.date)}</td><td>${escapeHtml(event.time)}</td><td>${escapeHtml(event.direction)}</td><td>${escapeHtml(event.location || "—")}</td></tr>`).join("") : '<tr><td colspan="4">No attendance records are available for this account yet.</td></tr>';
-  if (me.features?.guardianNotificationPreferences) {
-    byId("guardian-settings").hidden = false;
-    const prefs = await api("/api/portal/guardian-notification-preferences");
-    byId("checkin-pref").checked = !!prefs.attendanceCheckIn;
-    byId("checkout-pref").checked = !!prefs.attendanceCheckOut;
-    byId("absence-pref").checked = !!prefs.absenceAlert;
-  }
+
 }
 byId("login-form").addEventListener("submit", async event => {
   event.preventDefault(); showMessage("login-message", "Signing in…");
@@ -40,9 +34,3 @@ byId("login-form").addEventListener("submit", async event => {
 });
 byId("logout").addEventListener("click", () => { accessToken = null; byId("portal-view").hidden = true; byId("login-view").hidden = false; byId("login-form").reset(); });
 byId("refresh").addEventListener("click", async () => { try { await loadPortal(); } catch (error) { showMessage("login-message", error.message); } });
-byId("save-preferences").addEventListener("click", async () => {
-  try {
-    await api("/api/portal/guardian-notification-preferences", { method:"PUT", body:JSON.stringify({ attendanceCheckIn:byId("checkin-pref").checked, attendanceCheckOut:byId("checkout-pref").checked, absenceAlert:byId("absence-pref").checked }) });
-    showMessage("preferences-message", "Preferences saved.");
-  } catch (error) { showMessage("preferences-message", error.message); }
-});
