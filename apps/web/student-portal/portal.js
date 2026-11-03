@@ -16,6 +16,21 @@ function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, c =>
 async function loadPortal() {
   const me = await api("/api/portal/me");
   byId("display-name").textContent = me.student.displayName;
+  byId("profile-name").textContent = me.student.displayName;
+  byId("student-lrn").textContent = me.student.lrn || "Not available";
+  const photo = byId("student-photo");
+  photo.hidden = true; photo.removeAttribute("src");
+  byId("photo-placeholder").hidden = false;
+  if (me.student.hasPhoto) {
+    try {
+      const imageResponse = await fetch(API_BASE + "/api/portal/photo", { headers: { Authorization: "Bearer " + accessToken } });
+      if (imageResponse.ok) {
+        const imageBlob = await imageResponse.blob();
+        photo.src = URL.createObjectURL(imageBlob);
+        photo.onload = () => { byId("photo-placeholder").hidden = true; photo.hidden = false; };
+      }
+    } catch { /* Keep the initials placeholder when the photo cannot load. */ }
+  }
   byId("grade-section").textContent = [me.student.gradeLevel, me.student.sectionName].filter(Boolean).join(" — ") || "—";
   byId("student-number").textContent = me.student.maskedStudentNumber || "—";
   byId("school-year").textContent = me.student.schoolYear || "—";
