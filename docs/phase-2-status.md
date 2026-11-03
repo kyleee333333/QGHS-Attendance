@@ -18,3 +18,11 @@
 ## Required before real records
 
 The school must approve the data-processing purpose, privacy notice, retention/deletion schedule, authorized roles, guardian/student notices and consent/other lawful basis, incident response, backup location, and access-control procedure. Validate the plan with the school's Data Protection Officer or authorized privacy lead.
+
+## Added scope: student portal and parent email foundation
+
+- Added a one-to-one student account link table for the student portal.
+- Added verified-email timestamp support on user accounts.
+- Added per-guardian attendance email preferences and a durable email outbox table.
+- Documented student-only record access, parent/guardian verification, notification types, delivery safeguards, and privacy requirements in `docs/student-portal-parent-email.md`.
+- These are schema and requirements only. Student portal screens/API, authentication/authorization, email verification, provider integration, mail worker, and end-to-end delivery tests are not yet implemented.
