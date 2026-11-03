@@ -7,10 +7,11 @@ const migrationPath = fileURLToPath(
 );
 
 function splitStatements(sql: string): string[] {
-  return sql
+  const withoutComments = sql.replace(/^\s*--.*$/gm, "");
+  return withoutComments
     .split(/;\s*(?:\r?\n|$)/)
     .map((statement) => statement.trim())
-    .filter((statement) => statement.length > 0 && !statement.startsWith("--"));
+    .filter((statement) => statement.length > 0);
 }
 
 async function main(): Promise<void> {
