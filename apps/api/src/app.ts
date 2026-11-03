@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { env, corsOrigins } from "./config/env.js";
+import { checkAccessConnection } from "./db/connection.js";
 
 export const app = express();
 
@@ -22,9 +23,22 @@ app.get("/api/health", (_req, res) => {
     system: "QGHS CONNECT",
     version: "2.0.0",
     environment: env.NODE_ENV,
-    database: "not_checked_by_health_endpoint",
-    attendanceMode: "hardware_or_explicit_test_simulator"
+    database: "use_database_health_endpoint",
+    attendanceMode: "physical_terminal_only"
   });
+});
+
+app.get("/api/health/database", async (_req, res) => {
+  try {
+    await checkAccessConnection();
+    res.status(200).json({ ok: true, database: "connected" });
+  } catch {
+    res.status(503).json({
+      ok: false,
+      database: "unavailable",
+      message: "The Access database is not configured or cannot be reached."
+    });
+  }
 });
 
 app.use((_req, res) => {
