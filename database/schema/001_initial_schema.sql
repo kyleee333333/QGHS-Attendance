@@ -125,3 +125,51 @@ CREATE TABLE AttendanceInterventions (
 );
 
 CREATE INDEX IX_Interventions_StudentID ON AttendanceInterventions (StudentID);
+
+
+-- Student portal: a student account is explicitly linked to one student record.
+CREATE TABLE StudentAccountLinks (
+  StudentAccountLinkID AUTOINCREMENT PRIMARY KEY,
+  UserID LONG NOT NULL,
+  StudentID LONG NOT NULL,
+  IsActive YESNO NOT NULL,
+  LinkedAt DATETIME NOT NULL,
+  CONSTRAINT FK_StudentAccountLinks_Users FOREIGN KEY (UserID) REFERENCES Users (UserID),
+  CONSTRAINT FK_StudentAccountLinks_Students FOREIGN KEY (StudentID) REFERENCES Students (StudentID)
+);
+
+CREATE UNIQUE INDEX UX_StudentAccountLinks_UserID ON StudentAccountLinks (UserID);
+CREATE UNIQUE INDEX UX_StudentAccountLinks_StudentID ON StudentAccountLinks (StudentID);
+
+-- Parent/guardian email preferences are scoped to a verified guardian-student link.
+CREATE TABLE EmailNotificationPreferences (
+  EmailPreferenceID AUTOINCREMENT PRIMARY KEY,
+  GuardianLinkID LONG NOT NULL,
+  AttendanceCheckIn YESNO NOT NULL,
+  AttendanceCheckOut YESNO NOT NULL,
+  AbsenceAlert YESNO NOT NULL,
+  UpdatedAt DATETIME NOT NULL,
+  CONSTRAINT FK_EmailPreferences_GuardianLinks FOREIGN KEY (GuardianLinkID) REFERENCES GuardianLinks (GuardianLinkID)
+);
+
+CREATE UNIQUE INDEX UX_EmailPreferences_GuardianLinkID ON EmailNotificationPreferences (GuardianLinkID);
+
+-- Queue only; a separate mail worker must send messages to verified guardian addresses.
+CREATE TABLE EmailNotificationOutbox (
+  EmailOutboxID AUTOINCREMENT PRIMARY KEY,
+  GuardianLinkID LONG NOT NULL,
+  AttendanceEventID LONG,
+  NotificationType TEXT(30) NOT NULL,
+  SubjectText TEXT(180) NOT NULL,
+  BodyText LONGTEXT NOT NULL,
+  DeliveryStatus TEXT(20) NOT NULL,
+  AttemptCount LONG NOT NULL,
+  CreatedAt DATETIME NOT NULL,
+  SentAt DATETIME,
+  LastErrorCode TEXT(60),
+  CONSTRAINT FK_EmailOutbox_GuardianLinks FOREIGN KEY (GuardianLinkID) REFERENCES GuardianLinks (GuardianLinkID),
+  CONSTRAINT FK_EmailOutbox_AttendanceEvents FOREIGN KEY (AttendanceEventID) REFERENCES AttendanceEvents (AttendanceEventID)
+);
+
+CREATE INDEX IX_EmailOutbox_Status_CreatedAt ON EmailNotificationOutbox (DeliveryStatus, CreatedAt);
+CREATE INDEX IX_EmailOutbox_GuardianLinkID ON EmailNotificationOutbox (GuardianLinkID);
