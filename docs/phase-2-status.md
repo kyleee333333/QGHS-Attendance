@@ -34,3 +34,18 @@ The school must approve the data-processing purpose, privacy notice, retention/d
 - Added `docs/portal-api-contract.md` for the protected routes and notification delivery behavior expected by both clients.
 - The web clients are interface/integration scaffolds only. The API authentication, protected portal routes, guardian relationship enforcement, email verification, SMTP integration, and mail worker are not implemented. The pages therefore cannot sign in or send emails yet.
 - No live website deployment or production database connection has been performed.
+
+## Secure login and parent email implementation added
+
+- Added database-backed login route at `POST /api/auth/login`, scrypt password verification, short-lived signed access tokens, role middleware, and failed-login throttling.
+- Added protected student profile and attendance routes, and parent profile, linked-child attendance, and notification-preference routes.
+- Added a local-only account provisioning helper at `apps/api/src/admin/create-account.ts`; public self-registration is not provided.
+- Added server-side SMTP mailer, attendance-notice outbox queue helper, and a separate polling worker (`pnpm --filter @qghs/api email:worker`).
+- Added parent preference and verified-email checks before queued notices are sent.
+
+### Not yet production-ready
+
+- No live Access database or SMTP provider has been configured or tested; no end-to-end build/typecheck has been confirmed.
+- Physical terminal attendance ingestion is not yet wired to the email queue helper, so end-to-end automatic notifications are not active.
+- Absence-alert cutoff scheduling, email-address verification workflow, persistent distributed login throttling, session revocation, worker leasing/transactional claiming, and automated integration tests remain outstanding.
+- Do not load real student or guardian data until QGHS authorizes the privacy, access, retention, and operational controls.
