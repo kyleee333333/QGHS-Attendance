@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+dist/
+build/
+.expo/
+coverage/
+.env
+.env.*
+!.env.example
+*.accdb
+*.laccdb
+*.log
+.DS_Store
+Thumbs.db
