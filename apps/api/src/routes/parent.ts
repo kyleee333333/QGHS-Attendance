@@ -7,7 +7,7 @@ const schema=z.object({attendanceCheckIn:z.boolean(),attendanceCheckOut:z.boolea
 router.get("/notification-preferences",requireAuth(["parent"]),async(_req,res)=>{
  let db;try{
   const auth=res.locals.auth as {userId:number};db=await openAccessConnection();
-  const rows=await db.query("SELECT TOP 1 P.AttendanceCheckIn,P.AttendanceCheckOut,P.AbsenceAlert FROM EmailNotificationPreferences P INNER JOIN GuardianLinks G ON P.GuardianLinkID=G.GuardianLinkID WHERE G.UserID=? AND G.IsActive=True",[auth.userId]) as Array<{AttendanceCheckIn:boolean;AttendanceCheckOut:boolean;AbsenceAlert:boolean}>;
+  const rows=await db.query("SELECT TOP 1 P.AttendanceCheckIn,P.AttendanceCheckOut,P.AbsenceAlert FROM (EmailNotificationPreferences P INNER JOIN GuardianLinks G ON P.GuardianLinkID=G.GuardianLinkID) INNER JOIN Users U ON G.UserID=U.UserID WHERE G.UserID=? AND G.IsActive=True AND U.IsActive=True AND U.EmailVerifiedAt IS NOT NULL",[auth.userId]) as Array<{AttendanceCheckIn:boolean;AttendanceCheckOut:boolean;AbsenceAlert:boolean}>;
   res.json({attendanceCheckIn:rows[0]?.AttendanceCheckIn??false,attendanceCheckOut:rows[0]?.AttendanceCheckOut??false,absenceAlert:rows[0]?.AbsenceAlert??false});
  }catch{res.status(503).json({error:{code:"PREFERENCES_UNAVAILABLE",message:"Preferences are temporarily unavailable."}});}finally{if(db)await db.close();}
 });
@@ -15,7 +15,7 @@ router.put("/notification-preferences",requireAuth(["parent"]),async(req,res)=>{
  const parsed=schema.safeParse(req.body);if(!parsed.success){res.status(400).json({error:{code:"INVALID_INPUT",message:"Invalid notification preferences."}});return;}
  let db;try{
   const auth=res.locals.auth as {userId:number};db=await openAccessConnection();
-  const links=await db.query("SELECT TOP 1 GuardianLinkID FROM GuardianLinks WHERE UserID=? AND IsActive=True",[auth.userId]) as Array<{GuardianLinkID:number}>;
+  const links=await db.query("SELECT TOP 1 G.GuardianLinkID FROM GuardianLinks G INNER JOIN Users U ON G.UserID=U.UserID WHERE G.UserID=? AND G.IsActive=True AND U.IsActive=True AND U.EmailVerifiedAt IS NOT NULL",[auth.userId]) as Array<{GuardianLinkID:number}>;
   if(!links[0]){res.status(403).json({error:{code:"NO_GUARDIAN_LINK",message:"No verified guardian link is available."}});return;}
   const id=links[0].GuardianLinkID,p=parsed.data;
   const existing=await db.query("SELECT EmailPreferenceID FROM EmailNotificationPreferences WHERE GuardianLinkID=?",[id]) as Array<{EmailPreferenceID:number}>;
