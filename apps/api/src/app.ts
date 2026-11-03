@@ -3,6 +3,10 @@ import cors from "cors";
 import helmet from "helmet";
 import { env, corsOrigins } from "./config/env.js";
 import { checkAccessConnection } from "./db/connection.js";
+import authRoutes from "./routes/auth.js";
+import studentPortalRoutes from "./routes/portal.js";
+import parentRoutes from "./routes/parent.js";
+import parentProfileRoutes from "./routes/parent-profile.js";
 
 export const app = express();
 
@@ -16,6 +20,11 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: "32kb" }));
+
+app.use("/api/auth", authRoutes);
+app.use("/api/portal", studentPortalRoutes);
+app.use("/api/parent", parentRoutes);
+app.use("/api/parent", parentProfileRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.status(200).json({
