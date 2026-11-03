@@ -1,0 +1,15 @@
+{
+  "name": "qghs-connect",
+  "version": "2.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "dev:api": "pnpm --filter @qghs/api dev",
+    "build:api": "pnpm --filter @qghs/api build",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "tsx": "^4.20.6"
+  }
+}
