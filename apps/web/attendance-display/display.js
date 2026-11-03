@@ -3,6 +3,7 @@
 (() => {
   const byId = id => document.getElementById(id);
   let resetTimer = null;
+  let photoObjectUrl = null;
   function show(view) {
     ["ready-view","success-view","failure-view"].forEach(id => { byId(id).hidden = id !== view; });
     if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
@@ -17,9 +18,17 @@
     byId("result-time").textContent = student.timeLabel || "";
     const img = byId("result-photo"), fallback = byId("photo-fallback");
     img.hidden = true; img.removeAttribute("src"); fallback.hidden = false;
+    if (photoObjectUrl) { URL.revokeObjectURL(photoObjectUrl); photoObjectUrl = null; }
     if (student.photoUrl && typeof student.photoUrl === "string" && student.photoUrl.startsWith("/")) {
-      img.onload = () => { fallback.hidden = true; img.hidden = false; };
-      img.src = student.photoUrl;
+      const headers = window.QGHS_TERMINAL_ACCESS_TOKEN ? { Authorization: "Bearer " + window.QGHS_TERMINAL_ACCESS_TOKEN } : {};
+      fetch(student.photoUrl, { headers, cache: "no-store" }).then(response => {
+        if (!response.ok) throw new Error("Photo unavailable");
+        return response.blob();
+      }).then(blob => {
+        photoObjectUrl = URL.createObjectURL(blob);
+        img.onload = () => { fallback.hidden = true; img.hidden = false; };
+        img.src = photoObjectUrl;
+      }).catch(() => { fallback.hidden = false; });
     }
     show("success-view");
     // Return to the neutral screen quickly so the next student cannot view the previous student's LRN.
@@ -37,7 +46,10 @@
     byId("failure-message").textContent = message;
     show("failure-view");
   }
-  byId("retry-button").addEventListener("click", showReady);
+  byId("retry-button").addEventListener("click", () => {
+    showReady();
+    window.dispatchEvent(new CustomEvent("qghs:fingerprint-retry"));
+  });
   window.QGHSAttendanceDisplay = Object.freeze({ showReady, showMatch, showFailure });
   showReady();
 })();
