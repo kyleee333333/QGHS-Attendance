@@ -21,7 +21,7 @@ export function buildAccessConnectionString(): string {
   return `DRIVER={${driver}};DBQ={${databasePath}}${password};`;
 }
 
-export async function openAccessConnection(): Promise<odbc.Pool> {
+export async function openAccessConnection() {
   return odbc.connect(buildAccessConnectionString());
 }
 
