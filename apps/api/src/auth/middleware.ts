@@ -1,0 +1,3 @@
+import type { Request,Response,NextFunction } from "express";
+import { verifyAccessToken,type PortalRole } from "./tokens.js";
+export function requireAuth(roles:PortalRole[]){return(req:Request,res:Response,next:NextFunction)=>{const header=req.header("authorization")||"";const match=header.match(/^Bearer\s+(.+)$/i);const claims=match?verifyAccessToken(match[1]):null;if(!claims){res.status(401).json({error:{code:"UNAUTHENTICATED",message:"Please sign in again."}});return;}if(!roles.includes(claims.role)){res.status(403).json({error:{code:"FORBIDDEN",message:"You do not have permission to access this resource."}});return;}res.locals.auth={userId:claims.sub,role:claims.role};next();};}
