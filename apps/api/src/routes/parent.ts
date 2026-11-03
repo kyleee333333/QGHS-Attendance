@@ -24,4 +24,12 @@ router.put("/notification-preferences",requireAuth(["parent"]),async(req,res)=>{
   res.json({ok:true});
  }catch{res.status(503).json({error:{code:"PREFERENCE_UPDATE_FAILED",message:"Unable to save preferences."}});}finally{if(db)await db.close();}
 });
+
+router.get("/attendance",requireAuth(["parent"]),async(_req,res)=>{
+ let db;try{
+  const auth=res.locals.auth as {userId:number};db=await openAccessConnection();
+  const rows=await db.query("SELECT TOP 100 A.EventAt,A.EventDirection,T.LocationName FROM ((AttendanceEvents A INNER JOIN GuardianLinks G ON A.StudentID=G.StudentID) LEFT JOIN Terminals T ON A.TerminalID=T.TerminalID) INNER JOIN Users U ON G.UserID=U.UserID WHERE G.UserID=? AND G.IsActive=True AND U.IsActive=True AND U.EmailVerifiedAt IS NOT NULL ORDER BY A.EventAt DESC",[auth.userId]) as Array<{EventAt:Date|string;EventDirection:string;LocationName?:string}>;
+  res.json({events:rows.map(e=>({date:new Date(e.EventAt).toISOString().slice(0,10),time:new Date(e.EventAt).toISOString().slice(11,16),direction:e.EventDirection,location:e.LocationName||null}))});
+ }catch{res.status(503).json({error:{code:"PARENT_ATTENDANCE_UNAVAILABLE",message:"Attendance history is temporarily unavailable."}});}finally{if(db)await db.close();}
+});
 export default router;
