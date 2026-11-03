@@ -4,9 +4,11 @@ The production database target is Microsoft Access (.accdb), accessed only by th
 
 ## Initial schema
 
-- Schema file: database/schema/001_initial_schema.sql
+- New database: schema file `database/schema/001_initial_schema.sql` (includes LRN and student photo filename fields).
+- Existing database: back up first, then apply `database/schema/002_student_identity_fields.sql` once in Access to add `Students.LRN` and `Students.PhotoFileName`.
 - Migration entry point: pnpm --filter @qghs/api db:migrate
 - Database path is configured with ACCESS_DB_PATH.
+- Student portrait files belong in a private folder configured by `STUDENT_PHOTO_DIR`; store only the approved filename in `Students.PhotoFileName`. The API serves the current student's image only through the authenticated `/api/portal/photo` route.
 - Optional database password is configured with ACCESS_DB_PASSWORD.
 
 The migration creates users, role assignments, students, guardian links, terminal registry, attendance events, idempotency receipts, audit logs, and human-reviewed attendance interventions.
