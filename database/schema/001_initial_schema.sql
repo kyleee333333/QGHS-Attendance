@@ -30,6 +30,8 @@ CREATE INDEX IX_UserRoles_UserID ON UserRoles (UserID);
 CREATE TABLE Students (
   StudentID AUTOINCREMENT PRIMARY KEY,
   StudentNumber TEXT(40) NOT NULL,
+  LRN TEXT(12),
+  PhotoFileName TEXT(120),
   GivenName TEXT(80) NOT NULL,
   MiddleName TEXT(80),
   FamilyName TEXT(80) NOT NULL,
