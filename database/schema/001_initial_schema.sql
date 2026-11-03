@@ -9,6 +9,7 @@ CREATE TABLE Users (
   PasswordHash TEXT(255) NOT NULL,
   DisplayName TEXT(160) NOT NULL,
   Email TEXT(160),
+  EmailVerifiedAt DATETIME,
   IsActive YESNO NOT NULL,
   CreatedAt DATETIME NOT NULL,
   UpdatedAt DATETIME NOT NULL
