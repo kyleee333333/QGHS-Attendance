@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#123b35"><title>Student Portal | QGHS CONNECT</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><div class="brand-mark">Q</div><div><strong>QGHS CONNECT</strong><small>QUIRINO GENERAL HIGH SCHOOL</small></div><span class="secure">SECURE PORTAL</span></header>
+    <section id="login-view" class="login-wrap">
+      <div class="intro"><p class="eyebrow">STUDENT & FAMILY SERVICES</p><h1>Your school life,<br><em>connected.</em></h1><p>Access your attendance record and stay informed with QGHS CONNECT.</p></div>
+      <form id="login-form" class="panel login-panel">
+        <p class="eyebrow">WELCOME BACK</p><h2>Sign in to your portal</h2>
+        <label for="username">Username</label><input id="username" name="username" autocomplete="username" required>
+        <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button type="submit">Sign in <span>→</span></button>
+        <p id="login-message" class="message" role="status">Use the account provided by your school.</p>
+      </form>
+    </section>
+    <section id="portal-view" hidden>
+      <div class="welcome-row"><div><p class="eyebrow">MY PORTAL</p><h1>Welcome, <span id="display-name">Student</span></h1><p class="muted">Your personal school information at a glance.</p></div><button id="logout" class="secondary">Sign out</button></div>
+      <div class="identity-grid">
+        <article class="panel"><small>GRADE & SECTION</small><strong id="grade-section">—</strong></article>
+        <article class="panel"><small>STUDENT NUMBER</small><strong id="student-number">—</strong></article>
+        <article class="panel"><small>SCHOOL YEAR</small><strong id="school-year">—</strong></article>
+      </div>
+      <div class="content-grid">
+        <article class="panel attendance-panel"><div class="section-head"><div><p class="eyebrow">ATTENDANCE</p><h2>My attendance history</h2></div><button id="refresh" class="secondary">Refresh</button></div>
+          <div class="table-scroll"><table><thead><tr><th>Date</th><th>Time</th><th>Activity</th><th>Location</th></tr></thead><tbody id="attendance-rows"><tr><td colspan="4">Sign in to load your attendance.</td></tr></tbody></table></div>
+        </article>
+        <article class="panel notice-panel"><p class="eyebrow">IMPORTANT</p><h2>Keep your account safe</h2><p>Only sign in on a device you trust. Sign out when you finish, especially on shared computers.</p><p class="privacy-note">Your portal only displays information linked to your own school account.</p></article>
+      </div>
+      <section id="guardian-settings" class="panel guardian-panel" hidden>
+        <p class="eyebrow">FAMILY NOTIFICATIONS</p><h2>Parent / guardian email alerts</h2><p class="muted">Manage the attendance emails sent to your verified parent or guardian contact.</p>
+        <label class="toggle"><input type="checkbox" id="checkin-pref"> Check-in notification</label>
+        <label class="toggle"><input type="checkbox" id="checkout-pref"> Check-out notification</label>
+        <label class="toggle"><input type="checkbox" id="absence-pref"> Absence alert</label>
+        <button id="save-preferences">Save notification preferences</button><p id="preferences-message" class="message" role="status"></p>
+      </section>
+    </section>
+    <footer>QGHS CONNECT <span>•</span> Student and family portal <span>•</span> School-authorized access only</footer>
+  </main>
+  <script src="./portal.js"></script>
+</body></html>
