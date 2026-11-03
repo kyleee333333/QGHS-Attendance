@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { env } from "../config/env.js";
 export type PortalRole = "student" | "parent" | "staff" | "admin";
 export interface AuthClaims { sub:number; role:PortalRole; exp:number }
-function secret():string { const value=env.JWT_ACCESS_SECRET; if(!value||value.length<32) throw new Error("JWT_ACCESS_SECRET must contain at least 32 characters."); return value; }
+function secret():string { const value=env.JWT_ACCESS_SECRET; if(!value||value.length<32||value.startsWith("replace-with")) throw new Error("Set a unique JWT_ACCESS_SECRET of at least 32 characters."); return value; }
 const encode=(value:unknown)=>Buffer.from(JSON.stringify(value)).toString("base64url");
 function sign(data:string):string{return createHmac("sha256",secret()).update(data).digest("base64url");}
 export function issueAccessToken(userId:number,role:PortalRole):string { const ttl=env.JWT_ACCESS_TTL_SECONDS; const head=encode({alg:"HS256",typ:"JWT"}); const body=encode({sub:userId,role,exp:Math.floor(Date.now()/1000)+ttl}); const input=head+"."+body; return input+"."+sign(input); }
