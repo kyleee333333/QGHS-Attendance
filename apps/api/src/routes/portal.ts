@@ -21,7 +21,7 @@ router.get("/photo",requireAuth(["student"]),async(_req,res)=>{
   db=await openAccessConnection();
   const rows=await db.query("SELECT S.PhotoFileName FROM StudentAccountLinks L INNER JOIN Students S ON L.StudentID=S.StudentID WHERE L.UserID=? AND L.IsActive=True AND S.IsActive=True",[auth.userId]) as Array<{PhotoFileName?:string|null}>;
   const filename=rows[0]?.PhotoFileName;
-  if(!filename || path.basename(filename)!==filename || !/^[a-zA-Z0-9_-]+\\.(jpg|jpeg|png|webp)$/i.test(filename)){
+  if(!filename || path.basename(filename)!==filename || !/^[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i.test(filename)){
    res.status(404).json({error:{code:"PHOTO_NOT_FOUND",message:"No student photo is available."}});return;
   }
   const absoluteRoot=path.resolve(photoDir);
