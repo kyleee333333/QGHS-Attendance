@@ -26,3 +26,11 @@ The school must approve the data-processing purpose, privacy notice, retention/d
 - Added per-guardian attendance email preferences and a durable email outbox table.
 - Documented student-only record access, parent/guardian verification, notification types, delivery safeguards, and privacy requirements in `docs/student-portal-parent-email.md`.
 - These are schema and requirements only. Student portal screens/API, authentication/authorization, email verification, provider integration, mail worker, and end-to-end delivery tests are not yet implemented.
+
+## Portal interface work added
+
+- Added a student portal web interface under `apps/web/student-portal/` with sign-in, own-profile summary, and attendance-history view. It calls the documented API contract and does not embed sample student data.
+- Added a parent/guardian portal under `apps/web/parent-portal/` with linked-child attendance view and email notification preference controls.
+- Added `docs/portal-api-contract.md` for the protected routes and notification delivery behavior expected by both clients.
+- The web clients are interface/integration scaffolds only. The API authentication, protected portal routes, guardian relationship enforcement, email verification, SMTP integration, and mail worker are not implemented. The pages therefore cannot sign in or send emails yet.
+- No live website deployment or production database connection has been performed.
