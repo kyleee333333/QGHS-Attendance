@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#123b35"><title>Student Portal | QGHS CONNECT</title>
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icons/icon-192.svg" type="image/svg+xml"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
   <main class="shell">
@@ -35,5 +35,5 @@
    </section>
     <footer>QGHS CONNECT <span>•</span> Student and family portal <span>•</span> School-authorized access only</footer>
   </main>
-  <script src="./portal.js"></script>
+  <script src="./portal.js"></script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
 </body></html>
