@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import studentPortalRoutes from "./routes/portal.js";
 import parentRoutes from "./routes/parent.js";
 import parentProfileRoutes from "./routes/parent-profile.js";
+import studentPhotoAdminRoutes from "./routes/student-photo-admin.js";
 
 export const app = express();
 
@@ -19,12 +20,14 @@ app.use(cors({
   },
   credentials: true
 }));
+app.use("/api/admin", express.raw({ type: ["image/jpeg", "image/png", "image/webp"], limit: "5mb" }));
 app.use(express.json({ limit: "32kb" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/portal", studentPortalRoutes);
 app.use("/api/parent", parentRoutes);
 app.use("/api/parent", parentProfileRoutes);
+app.use("/api/admin", studentPhotoAdminRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.status(200).json({
